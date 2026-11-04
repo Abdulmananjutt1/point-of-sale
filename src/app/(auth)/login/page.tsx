@@ -2,135 +2,259 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, User, Pill, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Lock, User, Pill, ShoppingCart, Barcode, Zap, AlertCircle, ArrowLeftRight } from "lucide-react";
 import { authService } from "@/services/authService";
 import { toastSuccess, toastApiError } from "@/lib/toast";
-import Link from "next/link";
 
 export default function CashierLoginPage() {
   const router = useRouter();
-
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPw, setShowPw]     = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
-  const [email, setEmail]     = useState("");
-  const [password, setPassword] = useState("");
-  const [showPw, setShowPw]   = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!email || !password) { setError("Please fill in all fields."); return; }
+
+    const cleanInput = email.trim();
+    const cleanPw = password.trim();
+
+    if (!cleanInput || !cleanPw) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const emailVal = email.includes("@") ? email : `${email}@pharmapos.com`;
-      const { token, user } = await authService.login(emailVal, password);
+      const emailVal = cleanInput.includes("@")
+        ? cleanInput.toLowerCase()
+        : `${cleanInput.toLowerCase()}@pharmapos.com`;
 
-      // Admin should use admin login page
+      const { token, user } = await authService.login(emailVal, cleanPw);
+
       if (user.role === "admin") {
-        setError("Please use the Admin login portal.");
+        setError("This account is an Admin. Please use the Admin login portal.");
+        setLoading(false);
         return;
       }
 
-      authService.saveToken(token, user.role, user.permissions);
-      toastSuccess(`Welcome, ${user.name}!`);
-      router.push("/sales");
       authService.saveToken(token, user.role);
       toastSuccess(`Welcome, ${user.name}!`);
-      router.push("/sales"); // Cashier goes directly to POS
+      // Full redirect to guarantee cookies and state sync across middleware and dashboard
+      window.location.href = "/sales";
     } catch (err) {
       toastApiError(err);
       setError(err instanceof Error ? err.message : "Invalid credentials.");
-    } finally {
       setLoading(false);
     }
   };
 
+  const fillDemoAccount = () => {
+    setEmail("cashier");
+    setPassword("cashier123");
+    setError("");
+  };
+
+  const handleSwitchToAdmin = () => {
+    authService.removeToken();
+    window.location.href = "/admin/login";
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen w-full flex bg-gradient-to-br from-white via-emerald-50/30 to-white relative overflow-hidden">
+      {/* Floating Decorative Elements - Top Right (pointer-events-none ensures zero click interference) */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-300/10 to-transparent rounded-full blur-3xl opacity-60 animate-pulse pointer-events-none select-none -z-0" />
+      <div className="absolute top-32 right-20 w-64 h-64 bg-gradient-to-br from-emerald-400/5 to-transparent rounded-full blur-2xl opacity-40 animate-bounce pointer-events-none select-none -z-0" style={{ animationDuration: '4s' }} />
+      
+      {/* Floating Decorative Elements - Bottom Right (pointer-events-none ensures zero click interference) */}
+      <div className="absolute bottom-0 right-16 w-80 h-80 bg-gradient-to-tl from-teal-300/5 to-transparent rounded-full blur-3xl opacity-50 animate-pulse pointer-events-none select-none -z-0" style={{ animationDuration: '3s' }} />
+      <div className="absolute bottom-40 right-64 w-72 h-72 bg-gradient-to-tl from-emerald-200/8 to-transparent rounded-full blur-2xl opacity-30 animate-bounce pointer-events-none select-none -z-0" style={{ animationDuration: '5s' }} />
 
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4 ring-2 ring-white/30">
-            <Pill size={32} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">PharmaPOS</h1>
-          <p className="text-blue-200 text-sm mt-1">Cashier Login</p>
+      {/* LEFT — Features (Desktop Only) */}
+      <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800">
+        {/* Decorative Background - Animated Blobs */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none select-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-teal-200 rounded-full blur-3xl opacity-30 animate-bounce" style={{ animationDuration: '4s' }} />
+          <div className="absolute top-1/2 -left-32 w-64 h-64 bg-emerald-300 rounded-full blur-2xl opacity-10 animate-pulse" style={{ animationDuration: '5s' }} />
         </div>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-5 text-sm text-red-700 flex items-center gap-2">
-              <span className="shrink-0">⚠️</span>{error}
+        <div className="relative z-10 space-y-12">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center border border-white/20">
+              <Pill size={24} className="text-white" />
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Email / Username</label>
-              <div className="relative">
-                <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <input type="text" value={email} onChange={(e) => setEmail(e.target.value)}
-                  placeholder="cashier" autoFocus
-                  className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              </div>
+              <h1 className="text-2xl font-bold text-white">PharmaPOS</h1>
+              <p className="text-emerald-100 text-xs font-semibold tracking-wide">CASHIER POS</p>
             </div>
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
-              <div className="relative">
-                <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-10 pr-11 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <button type="button" onClick={() => setShowPw((p) => !p)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
+          {/* Heading */}
+          <div>
+            <h2 className="text-5xl font-bold text-white mb-3 leading-tight">
+              Fast & Easy<br />Checkout
+            </h2>
+            <p className="text-emerald-100 text-lg">Manage sales, scan items, and process payments in seconds.</p>
+          </div>
 
-            <button type="submit" disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60 mt-2">
-              {loading ? (
-                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-              ) : null}
-              {loading ? "Signing in…" : "Sign In to POS"}
-            </button>
-          </form>
-
-          {/* Demo creds */}
-          <div className="mt-5 pt-4 border-t border-gray-100">
-            <p className="text-xs text-gray-400 text-center mb-2">Demo credentials</p>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Email</p>
-                <p className="font-mono text-xs font-bold text-gray-700">cashier</p>
+          {/* Features */}
+          <div className="space-y-2">
+            {[
+              { icon: ShoppingCart, title: "Quick Sales Processing" },
+              { icon: Barcode, title: "Fast Barcode Scanning" },
+              { icon: Zap, title: "Instant Checkout" },
+            ].map(({ icon: Icon, title }, idx) => (
+              <div 
+                key={title} 
+                className="flex items-center gap-3 text-white group hover:translate-x-1 transition-transform duration-300"
+                style={{ 
+                  animation: `fadeInLeft 0.6s ease-out ${idx * 0.1}s both`,
+                }}
+              >
+                <Icon size={20} className="text-emerald-200 group-hover:text-emerald-100 transition-colors" />
+                <span className="font-medium group-hover:tracking-wider transition-all">{title}</span>
               </div>
-              <div className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Password</p>
-                <p className="font-mono text-xs font-bold text-gray-700">cashier123</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Admin link */}
-        <p className="text-center mt-5">
-          <Link href="/admin/login"
-            className="inline-flex items-center gap-1.5 text-blue-200 hover:text-white text-xs transition-colors">
-            <ShieldCheck size={12} />Admin / Manager login
-          </Link>
-        </p>
+        {/* Footer */}
+        <p className="text-emerald-100 text-xs">© 2026 PharmaPOS. All rights reserved.</p>
+      </div>
+
+      {/* RIGHT — Login Form (Elevated with relative z-10 for guaranteed clickability) */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-8 relative z-10">
+        <div className="w-full max-w-sm relative z-10">
+          {/* Mobile Logo */}
+          <div className="flex lg:hidden items-center gap-2 mb-8">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center">
+              <Pill size={20} className="text-white" />
+            </div>
+            <span className="text-xl font-bold text-gray-900">PharmaPOS</span>
+          </div>
+
+          {/* Header */}
+          <div className="mb-8 lg:mb-6">
+            <div className="inline-flex items-center gap-2 bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-lg mb-3">
+              <ShoppingCart size={14} />
+              <span className="text-xs font-bold uppercase tracking-wide">Cashier</span>
+            </div>
+            <h1 className="text-3xl lg:text-2xl font-bold text-gray-900 mb-2">Sign In</h1>
+            <p className="text-gray-600 text-sm">Welcome to your POS terminal</p>
+          </div>
+
+          {/* Form Card (Elevated with relative z-20) */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-7 relative z-20">
+            {error && (
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-6 text-sm text-red-700">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email/Username */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Username or Email</label>
+                <div className="relative">
+                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    placeholder="cashier"
+                    autoFocus
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type={showPw ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                    placeholder="••••••••"
+                    required
+                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Sign In Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 px-4 mt-6 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart size={16} />
+                    Sign In
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Switch to Admin - Matching design, 100% full button clickable */}
+            <div className="mt-6 pt-6 border-t border-gray-200 relative z-30">
+              <button
+                type="button"
+                onClick={handleSwitchToAdmin}
+                className="w-full flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 active:bg-gray-200/70 border border-gray-200 hover:border-gray-300 rounded-xl transition-all duration-150 cursor-pointer shadow-xs hover:shadow-sm select-none group"
+              >
+                <ArrowLeftRight size={16} className="text-gray-500 group-hover:text-gray-700 transition-colors pointer-events-none shrink-0" />
+                <span className="pointer-events-none">Switch to Admin Login</span>
+              </button>
+            </div>
+
+            {/* Demo Info */}
+            <div className="mt-6 pt-6 border-t border-gray-200 relative z-30">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Demo Account</p>
+                <span className="text-[11px] text-emerald-600 font-medium">(Click to autofill)</span>
+              </div>
+              <div 
+                onClick={fillDemoAccount}
+                className="grid grid-cols-2 gap-3 text-xs cursor-pointer group select-none"
+                title="Click to fill cashier credentials"
+              >
+                <div className="bg-emerald-50 group-hover:bg-emerald-100/70 transition-colors rounded-lg px-3 py-2.5 border border-emerald-200 pointer-events-none">
+                  <p className="text-gray-500 font-bold mb-0.5">Username</p>
+                  <p className="font-mono font-bold text-gray-700">cashier</p>
+                </div>
+                <div className="bg-emerald-50 group-hover:bg-emerald-100/70 transition-colors rounded-lg px-3 py-2.5 border border-emerald-200 pointer-events-none">
+                  <p className="text-gray-500 font-bold mb-0.5">Password</p>
+                  <p className="font-mono font-bold text-gray-700">cashier123</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

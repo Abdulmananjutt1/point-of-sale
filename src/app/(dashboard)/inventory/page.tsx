@@ -1,14 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
-  Search, Package, TrendingUp, ArrowUpDown,
-  PackagePlus, Filter, Loader2, RefreshCw,
+  Search,
+  Package,
+  TrendingUp,
+  ArrowUpDown,
+  PackagePlus,
+  Filter,
+  Loader2,
+  RefreshCw,
+  Boxes,
+  DollarSign,
+  AlertTriangle,
+  Clock,
+  Download,
+  X,
+  FileSpreadsheet,
+  CheckCircle2,
+  ShieldAlert,
+  Percent,
+  Warehouse,
 } from "lucide-react";
 import Header from "@/components/layout/Header";
-import StatCard from "@/components/ui/StatCard";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import Pagination from "@/components/ui/Pagination";
 import AlertBanner from "@/components/inventory/AlertBanner";
 import StockBar from "@/components/inventory/StockBar";
 import ExpiryBadge from "@/components/inventory/ExpiryBadge";
@@ -21,29 +38,33 @@ import { medicineService } from "@/services/medicineService";
 import { supplierService } from "@/services/supplierService";
 
 type FilterKey = "all" | "out-of-stock" | "low-stock" | "expiring" | "expired";
-type SortKey   = "name" | "stock" | "expiry" | "value";
-type SortDir   = "asc" | "desc";
+type SortKey = "name" | "stock" | "expiry" | "value";
+type SortDir = "asc" | "desc";
 
 export default function InventoryPage() {
   // ── Data state ─────────────────────────────────────────────────────────────
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // ── UI state ───────────────────────────────────────────────────────────────
-  const [search, setSearch]         = useState("");
-  const [filter, setFilter]         = useState<FilterKey>("all");
-  const [sortKey, setSortKey]       = useState<SortKey>("name");
-  const [sortDir, setSortDir]       = useState<SortDir>("asc");
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [adjustingMed, setAdjustingMed] = useState<Medicine | null>(null);
-  const [now, setNow]               = useState<Date | null>(null);
+  const [now, setNow] = useState<Date | null>(null);
 
-  useEffect(() => { setNow(new Date()); }, []);
+  useEffect(() => {
+    setNow(new Date());
+  }, []);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchAll = useCallback(async () => {
-    setLoading(true); setError(null);
+    setLoading(true);
+    setError(null);
     try {
       const [medResult, supResult] = await Promise.all([
         medicineService.getAll({ limit: 500 }),
@@ -52,65 +73,98 @@ export default function InventoryPage() {
       setMedicines(medResult.medicines);
       setSuppliers(supResult);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load inventory");
+      setError(err instanceof Error ? err.message : "Failed to load inventory valuation data");
       toastApiError(err);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  useEffect(() => {
+    fetchAll();
+  }, [fetchAll]);
 
   const alerts = useInventoryAlerts(medicines, now);
 
   // ── Stats ──────────────────────────────────────────────────────────────────
-  const totalValue       = medicines.reduce((s, m) => s + m.stock * m.purchasePrice, 0);
-  const totalRetailValue = medicines.reduce((s, m) => s + m.stock * m.sellingPrice, 0);
-  const totalUnits       = medicines.reduce((s, m) => s + m.stock, 0);
+  const stats = useMemo(() => {
+    const totalCost = medicines.reduce((s, m) => s + m.stock * m.purchasePrice, 0);
+    const totalRetail = medicines.reduce((s, m) => s + m.stock * m.sellingPrice, 0);
+    const totalUnits = medicines.reduce((s, m) => s + m.stock, 0);
+    const potentialMargin =
+      totalRetail > 0 ? (((totalRetail - totalCost) / totalRetail) * 100).toFixed(1) : "0";
+
+    return { totalCost, totalRetail, totalUnits, potentialMargin };
+  }, [medicines]);
 
   // ── Filter ─────────────────────────────────────────────────────────────────
-  const afterFilter = medicines.filter((m) => {
-    const q = search.toLowerCase();
-    const matchSearch =
-      m.name.toLowerCase().includes(q) ||
-      m.genericName.toLowerCase().includes(q) ||
-      m.brand.toLowerCase().includes(q) ||
-      m.batchNumber.toLowerCase().includes(q) ||
-      m.category.toLowerCase().includes(q);
+  const filteredMedicines = useMemo(() => {
+    return medicines.filter((m) => {
+      const q = search.toLowerCase();
+      const matchSearch =
+        m.name.toLowerCase().includes(q) ||
+        m.genericName.toLowerCase().includes(q) ||
+        m.brand.toLowerCase().includes(q) ||
+        m.batchNumber.toLowerCase().includes(q) ||
+        m.category.toLowerCase().includes(q);
 
-    if (!matchSearch) return false;
-    if (!now) return filter === "all";
+      if (!matchSearch) return false;
+      if (!now) return filter === "all";
 
-    switch (filter) {
-      case "out-of-stock": return m.stock === 0;
-      case "low-stock":    return m.stock > 0 && m.stock <= m.minStock;
-      case "expiring":     return !isExpiredFn(m.expiryDate, now) && isExpiringSoonFn(m.expiryDate, now);
-      case "expired":      return isExpiredFn(m.expiryDate, now);
-      default:             return true;
-    }
-  });
+      switch (filter) {
+        case "out-of-stock":
+          return m.stock === 0;
+        case "low-stock":
+          return m.stock > 0 && m.stock <= m.minStock;
+        case "expiring":
+          return !isExpiredFn(m.expiryDate, now) && isExpiringSoonFn(m.expiryDate, now);
+        case "expired":
+          return isExpiredFn(m.expiryDate, now);
+        default:
+          return true;
+      }
+    });
+  }, [medicines, search, filter, now]);
 
   // ── Sort ───────────────────────────────────────────────────────────────────
-  const sorted = [...afterFilter].sort((a, b) => {
-    let cmp = 0;
-    if (sortKey === "name")   cmp = a.name.localeCompare(b.name);
-    else if (sortKey === "stock")  cmp = a.stock - b.stock;
-    else if (sortKey === "expiry") cmp = new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
-    else if (sortKey === "value")  cmp = a.stock * a.purchasePrice - b.stock * b.purchasePrice;
-    return sortDir === "asc" ? cmp : -cmp;
-  });
+  const sortedMedicines = useMemo(() => {
+    return [...filteredMedicines].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "name") cmp = a.name.localeCompare(b.name);
+      else if (sortKey === "stock") cmp = a.stock - b.stock;
+      else if (sortKey === "expiry")
+        cmp = new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+      else if (sortKey === "value")
+        cmp = a.stock * a.purchasePrice - b.stock * b.purchasePrice;
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+  }, [filteredMedicines, sortKey, sortDir]);
+
+  const PAGE_SIZE = 10;
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filter, sortKey, sortDir]);
+
+  const paginatedMedicines = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return sortedMedicines.slice(start, start + PAGE_SIZE);
+  }, [sortedMedicines, currentPage]);
 
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    else { setSortKey(key); setSortDir("asc"); }
+    else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
   };
 
   // ── Stock adjust ───────────────────────────────────────────────────────────
   const handleAdjust = async (medicineId: string, adjustment: number) => {
     try {
       const updated = await medicineService.adjustStock(medicineId, adjustment);
-      setMedicines((prev) => prev.map((m) => m.id === medicineId ? updated : m));
-      toastSuccess("Stock adjusted");
+      setMedicines((prev) => prev.map((m) => (m.id === medicineId ? updated : m)));
+      toastSuccess("Inventory stock updated successfully");
       setAdjustingMed(null);
     } catch (err) {
       toastApiError(err);
@@ -118,116 +172,335 @@ export default function InventoryPage() {
   };
 
   const supplierName = (id: string) =>
-    suppliers.find((s) => s.id === id)?.name ?? "—";
+    suppliers.find((s) => s.id === id)?.name ?? "Direct Manufacturer";
 
   const filterTabs: { key: FilterKey; label: string; count: number }[] = [
-    { key: "all",          label: "All",           count: medicines.length },
-    { key: "out-of-stock", label: "Out of Stock",  count: alerts.outOfStock.length },
-    { key: "low-stock",    label: "Low Stock",     count: alerts.lowStock.length },
-    { key: "expiring",     label: "Expiring Soon", count: alerts.expiringSoon.length },
-    { key: "expired",      label: "Expired",       count: alerts.expired.length },
+    { key: "all", label: "All Stock", count: medicines.length },
+    { key: "out-of-stock", label: "Out of Stock", count: alerts.outOfStock.length },
+    { key: "low-stock", label: "Low Stock", count: alerts.lowStock.length },
+    { key: "expiring", label: "Expiring (30d)", count: alerts.expiringSoon.length },
+    { key: "expired", label: "Expired", count: alerts.expired.length },
   ];
 
-  // ── Loading / Error ────────────────────────────────────────────────────────
-  if (loading) return (
-    <div><Header title="Inventory" />
-      <div className="flex items-center justify-center h-64 text-gray-400">
-        <Loader2 size={28} className="animate-spin mr-3" /><span>Loading inventory…</span>
-      </div>
-    </div>
-  );
+  const exportCSV = () => {
+    if (medicines.length === 0) return;
+    const headers = [
+      "Medicine Name",
+      "Generic Formula",
+      "Brand",
+      "Category",
+      "Batch Number",
+      "Stock Count",
+      "Unit Cost (PKR)",
+      "Total Cost Value (PKR)",
+      "Retail Price (PKR)",
+      "Total Retail Value (PKR)",
+      "Expiry Date",
+      "Supplier",
+    ];
+    const rows = medicines.map((m) => [
+      `"${m.name.replace(/"/g, '""')}"`,
+      `"${m.genericName.replace(/"/g, '""')}"`,
+      `"${m.brand.replace(/"/g, '""')}"`,
+      `"${m.category}"`,
+      `"${m.batchNumber}"`,
+      m.stock,
+      m.purchasePrice,
+      m.stock * m.purchasePrice,
+      m.sellingPrice,
+      m.stock * m.sellingPrice,
+      `"${formatDate(m.expiryDate)}"`,
+      `"${supplierName(m.supplierId).replace(/"/g, '""')}"`,
+    ]);
+    const csvContent =
+      "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `inventory_valuation_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
-  if (error) return (
-    <div><Header title="Inventory" />
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <p className="text-red-500 font-medium">{error}</p>
-        <Button onClick={fetchAll} variant="outline"><RefreshCw size={14} />Retry</Button>
+  // ── Loading / Error ────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50/60">
+        <Header title="Inventory Valuation" />
+        <div className="flex flex-col items-center justify-center h-80 text-slate-400">
+          <Loader2 size={32} className="animate-spin text-emerald-500 mb-3" />
+          <span className="text-sm font-semibold text-slate-600">Calculating inventory valuations...</span>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-slate-50/60">
+        <Header title="Inventory Valuation" />
+        <div className="max-w-xl mx-auto mt-16 p-8 bg-rose-50 border border-rose-200 rounded-2xl text-center space-y-4">
+          <p className="text-rose-700 font-bold">{error}</p>
+          <Button onClick={fetchAll} variant="outline" className="border-rose-300">
+            <RefreshCw size={14} className="mr-2" /> Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <Header title="Inventory" />
-      <div className="p-6 space-y-6">
+    <div className="min-h-screen bg-slate-50/60 pb-16">
+      <Header title="Inventory Valuation & Stock Levels" />
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="Total Medicines"  value={medicines.length}              subtitle={`${totalUnits.toLocaleString()} total units`} icon={Package}    iconColor="text-blue-600"   iconBg="bg-blue-50"   />
-          <StatCard title="Inventory Cost"   value={formatCurrency(totalValue)}    subtitle="at purchase price"                            icon={TrendingUp}  iconColor="text-green-600"  iconBg="bg-green-50"  />
-          <StatCard title="Retail Value"     value={formatCurrency(totalRetailValue)} subtitle="at selling price"                          icon={TrendingUp}  iconColor="text-purple-600" iconBg="bg-purple-50" />
-          <StatCard title="Stock Alerts"     value={alerts.totalAlerts}            subtitle="items need attention"                         icon={Filter}
-            iconColor={alerts.totalAlerts > 0 ? "text-red-600" : "text-gray-400"}
-            iconBg={alerts.totalAlerts > 0 ? "bg-red-50" : "bg-gray-50"} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {/* Top Header Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                <Warehouse size={22} />
+              </span>
+              <h1 className="text-xl font-bold text-slate-900">Inventory Valuation & On-Hand Assets</h1>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+              Live warehouse asset tracking, procurement cost basis, retail sales projections, and stock corrections.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportCSV}
+              disabled={medicines.length === 0}
+              className="gap-2 text-slate-700 bg-white hover:bg-slate-50 border-slate-300"
+            >
+              <Download size={15} />
+              Export Valuation CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchAll}
+              disabled={loading}
+              className="gap-2 text-slate-700 bg-white hover:bg-slate-50 border-slate-300"
+            >
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+              Refresh
+            </Button>
+          </div>
         </div>
 
-        {/* Alert banners */}
+        {/* Executive Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Inventory Cost Value */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Asset Valuation (Cost)</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.totalCost)}</h3>
+              <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
+                <Boxes size={13} className="text-emerald-500" />
+                {stats.totalUnits.toLocaleString()} total units on hand
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <DollarSign size={24} />
+            </div>
+          </div>
+
+          {/* Retail Potential Value */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Retail Sales Potential</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.totalRetail)}</h3>
+              <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1 font-medium">
+                <Percent size={13} />
+                ~{stats.potentialMargin}% projected gross margin
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <TrendingUp size={24} />
+            </div>
+          </div>
+
+          {/* Formulations Count */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Formulations</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{medicines.length}</h3>
+              <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
+                <CheckCircle2 size={13} className="text-emerald-500" />
+                Registered in catalogue
+              </p>
+            </div>
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <Package size={24} />
+            </div>
+          </div>
+
+          {/* Risk Alerts */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Discrepancy & Alerts</p>
+              <h3 className="text-2xl font-black text-slate-900 mt-1">{alerts.totalAlerts}</h3>
+              <p
+                className={`text-xs mt-1 font-medium flex items-center gap-1 ${
+                  alerts.totalAlerts > 0 ? "text-rose-600 font-semibold" : "text-slate-500"
+                }`}
+              >
+                <AlertTriangle size={13} />
+                {alerts.outOfStock.length} out · {alerts.lowStock.length} low · {alerts.expired.length} expired
+              </p>
+            </div>
+            <div
+              className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                alerts.totalAlerts > 0 ? "bg-rose-50 text-rose-600" : "bg-slate-50 text-slate-400"
+              }`}
+            >
+              <Filter size={24} />
+            </div>
+          </div>
+        </div>
+
+        {/* Alert Banners Strip */}
         <AlertBanner alerts={alerts} onFilterClick={(key) => setFilter(key as FilterKey)} />
 
-        {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="relative flex-1 min-w-0 w-full sm:max-w-sm">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, brand, batch…"
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div className="flex gap-1.5 flex-wrap items-center">
-            {filterTabs.map(({ key, label, count }) => (
-              <button key={key} onClick={() => setFilter(key)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
-                  filter === key
-                    ? "bg-blue-600 text-white border-blue-600"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-blue-300 hover:text-blue-600"
-                }`}>
-                {label}
-                {count > 0 && key !== "all" && (
-                  <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${filter === key ? "bg-white/30 text-white" : "bg-gray-100 text-gray-600"}`}>
-                    {count}
-                  </span>
-                )}
+        {/* Toolbar: Search & Segmented Filter Controller */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          {/* Search Box */}
+          <div className="relative flex-1 max-w-md">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search by medicine, brand, formula, batch..."
+              className="w-full pl-10 pr-9 py-2 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all placeholder:text-slate-400"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                <X size={14} />
               </button>
-            ))}
-            <Button size="sm" variant="outline" onClick={fetchAll}><RefreshCw size={13} /></Button>
+            )}
+          </div>
+
+          {/* Segmented Filter Pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <div className="flex items-center p-1 bg-slate-100 rounded-xl text-xs font-medium text-slate-600 flex-wrap">
+              {filterTabs.map(({ key, label, count }) => {
+                const isActive = filter === key;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => setFilter(key)}
+                    className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-white text-slate-900 shadow-xs font-semibold"
+                        : "hover:text-slate-900 text-slate-600"
+                    }`}
+                  >
+                    <span>{label}</span>
+                    {count > 0 && key !== "all" && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                          key === "out-of-stock" || key === "expired"
+                            ? "bg-rose-100 text-rose-700"
+                            : key === "low-stock"
+                            ? "bg-amber-100 text-amber-800"
+                            : "bg-orange-100 text-orange-800"
+                        }`}
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto shadow-sm">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <SortTh label="Medicine" sortKey="name"   current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Category</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">Batch / Supplier</th>
-                <SortTh label="Stock"   sortKey="stock"  current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <SortTh label="Value"   sortKey="value"  current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <SortTh label="Expiry"  sortKey="expiry" current={sortKey} dir={sortDir} onClick={toggleSort} />
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {sorted.length === 0 ? (
-                <tr><td colSpan={8} className="px-4 py-14 text-center text-gray-400">
-                  <Package size={32} className="mx-auto mb-2 text-gray-300" strokeWidth={1.5} />
-                  No medicines match the current filter
-                </td></tr>
-              ) : sorted.map((med) => (
-                <InventoryRow key={med.id} medicine={med} now={now}
-                  supplierName={supplierName(med.supplierId)}
-                  onAdjust={() => setAdjustingMed(med)} />
-              ))}
-            </tbody>
-          </table>
-          {sorted.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-400">
-              Showing {sorted.length} of {medicines.length} medicines
+        {/* Inventory Table */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                  <SortTh label="Medicine Formulation" sortKey="name" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                  <th className="px-4 py-3.5">Category</th>
+                  <th className="px-4 py-3.5">Batch & Sourced Supplier</th>
+                  <SortTh label="Stock Level" sortKey="stock" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                  <SortTh label="Asset Value (Cost)" sortKey="value" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                  <SortTh label="Batch Expiry" sortKey="expiry" current={sortKey} dir={sortDir} onClick={toggleSort} />
+                  <th className="px-4 py-3.5">Status</th>
+                  <th className="px-5 py-3.5 text-right">Adjustment</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {sortedMedicines.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-16 text-center text-slate-400">
+                      <Package size={40} className="mx-auto mb-3 text-slate-300" strokeWidth={1.5} />
+                      <h4 className="text-base font-semibold text-slate-700">No Inventory Found</h4>
+                      <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                        No medicines match your active search or filter selection.
+                      </p>
+                      {(search || filter !== "all") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSearch("");
+                            setFilter("all");
+                          }}
+                          className="mt-4"
+                        >
+                          Reset Filters
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedMedicines.map((med) => (
+                    <InventoryRow
+                      key={med.id}
+                      medicine={med}
+                      now={now}
+                      supplierName={supplierName(med.supplierId)}
+                      onAdjust={() => setAdjustingMed(med)}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {sortedMedicines.length > 0 && sortedMedicines.length <= 10 && (
+            <div className="px-5 py-3.5 bg-slate-50/80 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+              <span>
+                Showing <strong className="text-slate-700">{sortedMedicines.length}</strong> of{" "}
+                <strong className="text-slate-700">{medicines.length}</strong> inventory products
+              </span>
+              <span className="hidden sm:inline">Click Adjust on any product to register immediate stock corrections</span>
             </div>
           )}
+
+          <Pagination
+            currentPage={currentPage}
+            totalItems={sortedMedicines.length}
+            pageSize={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+            itemLabel="inventory products"
+          />
         </div>
       </div>
 
+      {/* Stock Adjust Modal */}
       <StockAdjustModal
         medicine={adjustingMed}
         isOpen={!!adjustingMed}
@@ -238,93 +511,158 @@ export default function InventoryPage() {
   );
 }
 
-// ── Row ───────────────────────────────────────────────────────────────────────
-function InventoryRow({ medicine: med, now, supplierName, onAdjust }: {
-  medicine: Medicine; now: Date | null; supplierName: string; onAdjust: () => void;
+// ── Inventory Row Component ────────────────────────────────────────────────────
+function InventoryRow({
+  medicine: med,
+  now,
+  supplierName,
+  onAdjust,
+}: {
+  medicine: Medicine;
+  now: Date | null;
+  supplierName: string;
+  onAdjust: () => void;
 }) {
   const stockValue = med.stock * med.purchasePrice;
   const isOut = med.stock === 0;
   const isLow = !isOut && med.stock <= med.minStock;
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors group">
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-1.5">
-          <span className="font-semibold text-gray-900 whitespace-nowrap">{med.name}</span>
+    <tr className="hover:bg-slate-50/80 transition-colors group">
+      {/* Medicine Name and Rx */}
+      <td className="px-5 py-3.5">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-900 hover:text-emerald-600 transition-colors">
+            {med.name}
+          </span>
           {med.requiresPrescription && (
-            <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-full">Rx</span>
+            <span className="text-[10px] font-black text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
+              Rx
+            </span>
           )}
         </div>
-        <p className="text-xs text-gray-400 mt-0.5">{med.genericName}</p>
-        <p className="text-xs text-gray-400">{med.brand}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{med.genericName}</p>
+        <p className="text-[11px] text-slate-400">{med.brand}</p>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap"><Badge>{med.category}</Badge></td>
-      <td className="px-4 py-3">
-        <p className="font-mono text-xs text-gray-700">{med.batchNumber}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{supplierName}</p>
+
+      {/* Category */}
+      <td className="px-4 py-3.5 whitespace-nowrap">
+        <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200/60">
+          {med.category}
+        </span>
       </td>
-      <td className="px-4 py-3">
+
+      {/* Batch / Supplier */}
+      <td className="px-4 py-3.5">
+        <p className="font-mono text-xs text-slate-800 font-semibold">{med.batchNumber}</p>
+        <p className="text-xs text-slate-500 mt-0.5 truncate max-w-[170px]" title={supplierName}>
+          {supplierName}
+        </p>
+      </td>
+
+      {/* Stock Level */}
+      <td className="px-4 py-3.5">
         <div className="min-w-[100px]">
           <div className="flex items-baseline gap-1">
-            <span className={`font-bold text-sm ${isOut ? "text-red-600" : isLow ? "text-yellow-600" : "text-gray-900"}`}>{med.stock}</span>
-            <span className="text-xs text-gray-400">{med.unit}s</span>
+            <span
+              className={`font-black text-sm ${
+                isOut ? "text-rose-600" : isLow ? "text-amber-600" : "text-slate-900"
+              }`}
+            >
+              {med.stock}
+            </span>
+            <span className="text-xs text-slate-400 font-normal">{med.unit}s</span>
           </div>
           <StockBar stock={med.stock} minStock={med.minStock} className="mt-1.5 w-20" />
-          <p className="text-[10px] text-gray-400 mt-0.5">min {med.minStock}</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">Min: {med.minStock}</p>
         </div>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap">
-        <p className="font-medium text-gray-800">{formatCurrency(stockValue)}</p>
-        <p className="text-xs text-gray-400">{formatCurrency(med.purchasePrice)} / {med.unit.toLowerCase()}</p>
+
+      {/* Valuation */}
+      <td className="px-4 py-3.5 whitespace-nowrap">
+        <p className="font-bold text-slate-900 text-sm">{formatCurrency(stockValue)}</p>
+        <p className="text-xs text-slate-400">
+          {formatCurrency(med.purchasePrice)} / {med.unit.toLowerCase()}
+        </p>
       </td>
-      <td className="px-4 py-3 whitespace-nowrap">
+
+      {/* Batch Expiry */}
+      <td className="px-4 py-3.5 whitespace-nowrap">
         {now ? (
-          <>
+          <div>
             <ExpiryBadge expiryDate={med.expiryDate} now={now} />
-            <p className="text-xs text-gray-400 mt-1">{formatDate(med.expiryDate)}</p>
-          </>
-        ) : <span className="text-gray-300 text-xs">—</span>}
+            <p className="text-[11px] text-slate-400 mt-1">{formatDate(med.expiryDate)}</p>
+          </div>
+        ) : (
+          <span className="text-slate-300 text-xs">—</span>
+        )}
       </td>
-      <td className="px-4 py-3">
-        <div className="flex flex-col gap-1">
-          {isOut && <Badge variant="danger">Out of Stock</Badge>}
-          {isLow && !isOut && <Badge variant="warning">Low Stock</Badge>}
-          {!isOut && !isLow && now && !isExpiredFn(med.expiryDate, now) && !isExpiringSoonFn(med.expiryDate, now) && (
-            <Badge variant="success">OK</Badge>
-          )}
-        </div>
+
+      {/* Status */}
+      <td className="px-4 py-3.5">
+        {isOut ? (
+          <Badge variant="danger">Out of Stock</Badge>
+        ) : isLow ? (
+          <Badge variant="warning">Low Stock</Badge>
+        ) : now && isExpiredFn(med.expiryDate, now) ? (
+          <Badge variant="danger">Expired</Badge>
+        ) : now && isExpiringSoonFn(med.expiryDate, now) ? (
+          <Badge variant="warning">Expiring</Badge>
+        ) : (
+          <Badge variant="success">Normal</Badge>
+        )}
       </td>
-      <td className="px-4 py-3">
-        <Button size="sm" variant="outline" onClick={onAdjust}
-          className="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-          <PackagePlus size={13} />Adjust
+
+      {/* Adjust CTA */}
+      <td className="px-5 py-3.5 text-right">
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={onAdjust}
+          className="gap-1.5 text-xs text-slate-700 hover:text-emerald-700 hover:bg-emerald-50 border-slate-300 whitespace-nowrap"
+        >
+          <PackagePlus size={14} className="text-emerald-600" />
+          Adjust
         </Button>
       </td>
     </tr>
   );
 }
 
-// ── Sortable header ───────────────────────────────────────────────────────────
-function SortTh({ label, sortKey, current, dir, onClick }: {
-  label: string; sortKey: SortKey; current: SortKey; dir: SortDir; onClick: (k: SortKey) => void;
+// ── Sortable Header Cell ───────────────────────────────────────────────────────
+function SortTh({
+  label,
+  sortKey,
+  current,
+  dir,
+  onClick,
+}: {
+  label: string;
+  sortKey: SortKey;
+  current: SortKey;
+  dir: SortDir;
+  onClick: (k: SortKey) => void;
 }) {
   const active = current === sortKey;
   return (
-    <th onClick={() => onClick(sortKey)}
-      className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap cursor-pointer hover:text-blue-600 select-none">
-      <span className="flex items-center gap-1">
+    <th
+      onClick={() => onClick(sortKey)}
+      className="px-4 py-3.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider whitespace-nowrap cursor-pointer hover:text-emerald-600 select-none transition-colors"
+    >
+      <span className="flex items-center gap-1.5">
         {label}
-        <ArrowUpDown size={12} className={active ? "text-blue-500" : "text-gray-300"} />
-        {active && <span className="text-[10px] text-blue-500">{dir === "asc" ? "↑" : "↓"}</span>}
+        <ArrowUpDown size={12} className={active ? "text-emerald-600" : "text-slate-300"} />
+        {active && <span className="text-[10px] text-emerald-600 font-bold">{dir === "asc" ? "↑" : "↓"}</span>}
       </span>
     </th>
   );
 }
 
-// ── Date helpers ──────────────────────────────────────────────────────────────
+// ── Date Helpers ──────────────────────────────────────────────────────────────
 function isExpiredFn(expiryDate: string, now: Date) {
   return new Date(expiryDate) < now;
 }
+
 function isExpiringSoonFn(expiryDate: string, now: Date) {
   const diff = (new Date(expiryDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
   return diff <= 30 && diff >= 0;

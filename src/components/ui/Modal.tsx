@@ -9,6 +9,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
 }
 
@@ -24,6 +25,7 @@ export default function Modal({
   onClose,
   title,
   children,
+  footer,
   size = "md",
 }: ModalProps) {
   // Close on Escape key
@@ -53,26 +55,33 @@ export default function Modal({
       {/* Modal */}
       <div
         className={cn(
-          "relative w-full bg-white rounded-2xl shadow-xl",
+          "relative w-full bg-white rounded-2xl shadow-xl flex flex-col max-h-[88vh] overflow-hidden",
           sizeStyles[size]
         )}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h3 id="modal-title" className="text-lg font-semibold text-gray-900">
+        {/* Header - Fixed */}
+        <div className="flex items-center justify-between p-5 md:px-6 md:py-4 border-b border-gray-100 flex-shrink-0">
+          <h3 id="modal-title" className="text-lg font-bold text-gray-900">
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
             aria-label="Close modal"
           >
             <X size={20} />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
+        {/* Body - Scrollable */}
+        <div className="p-5 md:p-6 overflow-y-auto flex-1">{children}</div>
+
+        {/* Footer - Pinned / Sticky at bottom */}
+        {footer && (
+          <div className="p-4 md:px-6 md:py-3.5 bg-slate-50 border-t border-slate-200/80 flex-shrink-0">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

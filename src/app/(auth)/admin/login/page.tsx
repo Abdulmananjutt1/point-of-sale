@@ -2,197 +2,259 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Lock, Mail, ShieldCheck, Pill, BarChart3, Users, Package } from "lucide-react";
+import { Eye, EyeOff, Lock, Mail, ShieldCheck, Pill, BarChart3, Users, Package, AlertCircle, ArrowLeftRight } from "lucide-react";
 import { authService } from "@/services/authService";
 import { toastSuccess, toastApiError } from "@/lib/toast";
-import Link from "next/link";
-
-const FEATURES = [
-  { icon: Pill,      title: "Inventory Control",   desc: "Real-time stock tracking with expiry alerts" },
-  { icon: BarChart3, title: "Sales Analytics",      desc: "Daily, weekly & monthly revenue insights" },
-  { icon: Users,     title: "Customer Management",  desc: "Loyalty programs & purchase history" },
-  { icon: Package,   title: "Purchase Orders",      desc: "Streamlined supplier order management" },
-];
 
 export default function AdminLoginPage() {
   const router = useRouter();
-
-  const [email, setEmail]       = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPw, setShowPw]     = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!email || !password) { setError("Please fill in all fields."); return; }
+
+    const cleanInput = email.trim();
+    const cleanPw = password.trim();
+
+    if (!cleanInput || !cleanPw) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const emailVal = email.includes("@") ? email : `${email}@pharmapos.com`;
-      const { token, user } = await authService.login(emailVal, password);
+      const emailVal = cleanInput.includes("@")
+        ? cleanInput.toLowerCase()
+        : `${cleanInput.toLowerCase()}@pharmapos.com`;
 
-      // Only admin can use this portal
+      const { token, user } = await authService.login(emailVal, cleanPw);
+
       if (user.role !== "admin") {
-        setError("Access denied. This portal is for Admins only. Use the Cashier login.");
+        setError("Access denied. Use the Cashier login for cashier accounts.");
+        setLoading(false);
         return;
       }
 
-      authService.saveToken(token, user.role, user.permissions);
       authService.saveToken(token, user.role);
       toastSuccess(`Welcome, ${user.name}!`);
-      router.push("/"); // Admin goes to dashboard
+      // Full redirect to guarantee cookies and state sync across middleware and dashboard
+      window.location.href = "/";
     } catch (err) {
       toastApiError(err);
       setError(err instanceof Error ? err.message : "Invalid credentials.");
-    } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen flex">
-      {/* LEFT — Branding */}
-      <div className="hidden lg:flex w-[52%] flex-col relative overflow-hidden bg-[#1e3a5f]">
-        <div className="absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-blue-500/20 blur-3xl" />
-        <div className="absolute -bottom-24 -right-24 w-[400px] h-[400px] rounded-full bg-indigo-500/20 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="absolute inset-0 opacity-[0.07]"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+  const fillDemoAccount = () => {
+    setEmail("admin");
+    setPassword("admin123");
+    setError("");
+  };
 
-        <div className="relative z-10 flex flex-col h-full p-12">
-          <div className="flex items-center gap-3 mb-auto">
-            <div className="w-11 h-11 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center ring-1 ring-white/20">
-              <Pill size={22} className="text-white" />
+  const handleSwitchToCashier = () => {
+    authService.removeToken();
+    window.location.href = "/login";
+  };
+
+  return (
+    <div className="min-h-screen w-full flex bg-gradient-to-br from-slate-50 via-blue-50/20 to-slate-50 relative overflow-hidden">
+      {/* Floating Decorative Elements - Top Right (pointer-events-none ensures zero click interference) */}
+      <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-300/10 to-transparent rounded-full blur-3xl opacity-60 animate-pulse pointer-events-none select-none -z-0" />
+      <div className="absolute top-32 right-20 w-64 h-64 bg-gradient-to-br from-blue-400/5 to-transparent rounded-full blur-2xl opacity-40 animate-bounce pointer-events-none select-none -z-0" style={{ animationDuration: '4s' }} />
+      
+      {/* Floating Decorative Elements - Bottom Right (pointer-events-none ensures zero click interference) */}
+      <div className="absolute bottom-0 right-16 w-80 h-80 bg-gradient-to-tl from-cyan-300/5 to-transparent rounded-full blur-3xl opacity-50 animate-pulse pointer-events-none select-none -z-0" style={{ animationDuration: '3s' }} />
+      <div className="absolute bottom-40 right-64 w-72 h-72 bg-gradient-to-tl from-blue-200/8 to-transparent rounded-full blur-2xl opacity-30 animate-bounce pointer-events-none select-none -z-0" style={{ animationDuration: '5s' }} />
+
+      {/* LEFT — Premium Features (Desktop Only) */}
+      <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-slate-800">
+        {/* Decorative Background - Animated Blobs */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none select-none">
+          <div className="absolute top-1/3 -right-40 w-80 h-80 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
+          <div className="absolute -bottom-32 left-1/4 w-96 h-96 bg-cyan-300 rounded-full blur-3xl opacity-30 animate-bounce" style={{ animationDuration: '4s' }} />
+          <div className="absolute top-1/2 -left-32 w-64 h-64 bg-blue-300 rounded-full blur-2xl opacity-10 animate-pulse" style={{ animationDuration: '5s' }} />
+        </div>
+
+        <div className="relative z-10 space-y-12">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center border border-white/20">
+              <Pill size={24} className="text-white" />
             </div>
             <div>
-              <span className="text-white font-bold text-xl leading-none">PharmaPOS</span>
-              <span className="block text-blue-200/70 text-[11px] font-medium tracking-widest uppercase mt-0.5">Admin Suite</span>
+              <h1 className="text-2xl font-bold text-white">PharmaPOS</h1>
+              <p className="text-blue-200 text-xs font-semibold tracking-wide">ADMIN PORTAL</p>
             </div>
           </div>
 
-          <div className="my-12">
-            <span className="inline-flex items-center gap-1.5 bg-blue-400/20 text-blue-200 text-xs font-semibold px-3 py-1.5 rounded-full ring-1 ring-blue-300/20 mb-5">
-              <ShieldCheck size={12} /> Super Admin Portal
-            </span>
-            <h1 className="text-[2.6rem] font-extrabold leading-[1.15] text-white mb-4">
-              Manage your<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300">
-                pharmacy smarter
-              </span>
-            </h1>
-            <p className="text-blue-100/60 text-base leading-relaxed max-w-sm">
-              Full access to inventory, reports, settings, and staff management.
-            </p>
+          {/* Heading */}
+          <div>
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
+              Manage Your<br />Pharmacy
+            </h2>
+            <p className="text-blue-100 text-base">Complete control over inventory, sales, staff, and analytics.</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-auto">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-white/[0.07] hover:bg-white/[0.11] transition-colors rounded-2xl p-4 ring-1 ring-white/10">
-                <div className="w-8 h-8 rounded-xl bg-blue-400/20 flex items-center justify-center mb-3">
-                  <Icon size={15} className="text-cyan-300" />
-                </div>
-                <p className="text-white text-sm font-semibold leading-tight">{title}</p>
-                <p className="text-blue-200/50 text-xs mt-1 leading-snug">{desc}</p>
+          {/* Feature Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { icon: Package, title: "Inventory" },
+              { icon: BarChart3, title: "Analytics" },
+              { icon: Users, title: "Staff Mgmt" },
+              { icon: Pill, title: "Stock Check" },
+            ].map(({ icon: Icon, title }, idx) => (
+              <div 
+                key={title} 
+                className="bg-white/5 hover:bg-white/15 transition-all duration-300 rounded-lg p-3 border border-white/10 hover:border-white/30 hover:shadow-lg hover:-translate-y-1 group cursor-pointer"
+                style={{ 
+                  animation: `fadeInUp 0.6s ease-out ${idx * 0.1}s both`,
+                }}
+              >
+                <Icon size={18} className="text-blue-300 mb-2 group-hover:text-blue-200 transition-colors" />
+                <p className="text-white font-semibold text-sm group-hover:translate-x-0.5 transition-transform">{title}</p>
               </div>
             ))}
           </div>
-          <p className="text-blue-300/30 text-xs mt-8">© 2026 PharmaPOS · All rights reserved</p>
         </div>
+
+        {/* Footer */}
+        <p className="text-blue-200/50 text-xs">© 2026 PharmaPOS. Secure Admin Access.</p>
       </div>
 
-      {/* RIGHT — Login form */}
-      <div className="flex-1 flex items-center justify-center bg-slate-50 p-6 lg:p-16">
-        <div className="w-full max-w-[400px]">
-
-          {/* Mobile logo */}
-          <div className="flex lg:hidden items-center gap-2.5 mb-10">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center">
-              <Pill size={18} className="text-white" />
+      {/* RIGHT — Login Form (Elevated with relative z-10 for guaranteed clickability) */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-8 relative z-10">
+        <div className="w-full max-w-sm relative z-10">
+          {/* Mobile Logo */}
+          <div className="flex lg:hidden items-center gap-2 mb-8">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center">
+              <Pill size={20} className="text-white" />
             </div>
-            <span className="font-bold text-slate-800 text-lg">PharmaPOS</span>
+            <span className="text-xl font-bold text-gray-900">PharmaPOS</span>
           </div>
 
-          <div className="mb-8">
-            <div className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-blue-100 mb-3">
-              <ShieldCheck size={12} />Admin Portal
+          {/* Header */}
+          <div className="mb-8 lg:mb-6">
+            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-3 py-1.5 rounded-lg mb-3">
+              <ShieldCheck size={14} />
+              <span className="text-xs font-bold uppercase tracking-wide">Admin Access</span>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Sign in as Admin</h2>
-            <p className="text-slate-500 text-sm mt-1.5">Access the full management dashboard.</p>
+            <h1 className="text-3xl lg:text-2xl font-bold text-gray-900 mb-2">Admin Login</h1>
+            <p className="text-gray-600 text-sm">Manage your pharmacy operations</p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-7">
+          {/* Form Card (Elevated with relative z-20) */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-7 relative z-20">
             {error && (
-              <div className="flex items-start gap-3 bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-5 text-sm text-red-700">
-                <svg className="w-4 h-4 mt-0.5 shrink-0 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
-                </svg>
-                {error}
+              <div className="flex gap-2 bg-red-50 border border-red-200 rounded-lg px-4 py-3 mb-6 text-sm text-red-700">
+                <AlertCircle size={16} className="shrink-0 mt-0.5" />
+                <span>{error}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Email */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Admin Email</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Username or Email Address</label>
                 <div className="relative">
-                  <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input type="text" value={email} onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin" autoFocus
-                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setError(""); }}
+                    placeholder="admin or admin@pharmapos.com"
+                    autoFocus
+                    required
+                    className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
                 </div>
               </div>
 
+              {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
                 <div className="relative">
-                  <Lock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                  <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)}
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type={showPw ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); setError(""); }}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-11 py-2.5 text-sm border border-slate-300 rounded-xl bg-white text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <button type="button" onClick={() => setShowPw((p) => !p)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
+                    required
+                    className="w-full pl-10 pr-10 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
-              <button type="submit" disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              {/* Sign In Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-2.5 px-4 mt-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:shadow"
+              >
                 {loading ? (
-                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                ) : <ShieldCheck size={15} />}
-                {loading ? "Signing in…" : "Sign In as Admin"}
+                  <>
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={16} />
+                    Sign In
+                  </>
+                )}
               </button>
             </form>
 
-            {/* Demo creds */}
-            <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-slate-200" />
-              <span className="text-slate-400 text-xs">demo credentials</span>
-              <div className="flex-1 h-px bg-slate-200" />
+            {/* Switch to Cashier - Matching design, 100% full button clickable */}
+            <div className="mt-6 pt-6 border-t border-gray-200 relative z-30">
+              <button
+                type="button"
+                onClick={handleSwitchToCashier}
+                className="w-full flex items-center justify-center gap-2.5 px-4 py-3 text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 active:bg-gray-200/70 border border-gray-200 hover:border-gray-300 rounded-xl transition-all duration-150 cursor-pointer shadow-xs hover:shadow-sm select-none group"
+              >
+                <ArrowLeftRight size={16} className="text-gray-500 group-hover:text-gray-700 transition-colors pointer-events-none shrink-0" />
+                <span className="pointer-events-none">Switch to Cashier Login</span>
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Email</p>
-                <p className="font-mono text-sm font-bold text-slate-700">admin</p>
+
+            {/* Demo Info */}
+            <div className="mt-6 pt-6 border-t border-gray-200 relative z-30">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Demo Account</p>
+                <span className="text-[11px] text-blue-600 font-medium">(Click to autofill)</span>
               </div>
-              <div className="bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Password</p>
-                <p className="font-mono text-sm font-bold text-slate-700">admin123</p>
+              <div 
+                onClick={fillDemoAccount}
+                className="grid grid-cols-2 gap-3 text-xs cursor-pointer group select-none"
+                title="Click to fill admin credentials"
+              >
+                <div className="bg-blue-50 group-hover:bg-blue-100/70 transition-colors rounded-lg px-3 py-2.5 border border-blue-200 pointer-events-none">
+                  <p className="text-gray-500 font-bold mb-0.5">Username / Email</p>
+                  <p className="font-mono font-bold text-gray-700">admin</p>
+                </div>
+                <div className="bg-blue-50 group-hover:bg-blue-100/70 transition-colors rounded-lg px-3 py-2.5 border border-blue-200 pointer-events-none">
+                  <p className="text-gray-500 font-bold mb-0.5">Password</p>
+                  <p className="font-mono font-bold text-gray-700">admin123</p>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* Cashier link */}
-          <p className="text-center mt-5 text-sm text-slate-500">
-            Are you a cashier?{" "}
-            <Link href="/login" className="text-blue-600 hover:text-blue-800 font-medium transition-colors">
-              Cashier Login →
-            </Link>
-          </p>
         </div>
       </div>
     </div>

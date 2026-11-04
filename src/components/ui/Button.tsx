@@ -8,12 +8,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles = {
-  primary: "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500",
-  secondary: "bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500",
+  primary:
+    "bg-[var(--theme-500,#2563eb)] hover:bg-[var(--theme-600,#1d4ed8)] text-white shadow-xs focus:ring-[var(--theme-400,#60a5fa)]",
+  secondary: "bg-slate-600 text-white hover:bg-slate-700 focus:ring-slate-500",
   danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
-  ghost: "bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-300",
+  ghost: "bg-transparent text-slate-600 hover:bg-slate-100 focus:ring-slate-300",
   outline:
-    "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-blue-500",
+    "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-[var(--theme-400,#60a5fa)]",
 };
 
 const sizeStyles = {

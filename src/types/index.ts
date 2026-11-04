@@ -195,13 +195,15 @@ export interface PurchaseOrder {
 }
 
 // ─── Stock Transfer ───────────────────────────────────────────────────────────
-export type TransferStatus = "Pending" | "InTransit" | "Received" | "Rejected";
+export type TransferStatus = "Pending" | "InTransit" | "Received" | "Returned" | "PaidCash" | "Rejected";
 export type TransferType   = "Internal" | "ExternalOut" | "ExternalIn";
 
 export interface StockTransferItem {
   medicineId: string;
   medicineName: string;
   quantity: number;
+  unitPrice?: number;
+  total?: number;
   batchNumber?: string;
   expiryDate?: string;
 }
@@ -214,9 +216,13 @@ export interface StockTransfer {
   toBranch: string;
   externalPharmacy?: string;
   externalPhone?: string;
+  contactPerson?: string;
+  settlementType?: "StockReturn" | "Cash" | "Pending";
+  settledAmount?: number;
   items: StockTransferItem[];
   transferDate: string;
   receiveDate?: string;
+  settledDate?: string;
   status: TransferStatus;
   notes?: string;
   initiatedBy: string;

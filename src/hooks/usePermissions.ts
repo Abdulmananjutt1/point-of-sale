@@ -34,14 +34,24 @@ export const PERMISSIONS = {
 export type PermissionKey = typeof PERMISSIONS[keyof typeof PERMISSIONS];
 
 export function usePermissions() {
-  const role        = authService.getRole();
-  const permissions = authService.getPermissions();
-  const isAdmin     = role === "admin";
+  const role    = authService.getRole();
+  const isAdmin = role === "admin";
 
   const can = useMemo(() => (permission: PermissionKey): boolean => {
+    // Admin has full access; cashiers have restricted access
     if (isAdmin) return true;
-    return permissions.includes(permission);
-  }, [isAdmin, permissions]);
+    // Cashier-allowed permissions
+    const cashierPermissions: PermissionKey[] = [
+      PERMISSIONS.SALES_CREATE,
+      PERMISSIONS.SALES_VIEW,
+      PERMISSIONS.CUSTOMERS_READ,
+      PERMISSIONS.CUSTOMERS_WRITE,
+      PERMISSIONS.RETURNS_READ,
+      PERMISSIONS.RETURNS_CREATE,
+      PERMISSIONS.DASHBOARD_VIEW,
+    ];
+    return cashierPermissions.includes(permission);
+  }, [isAdmin]);
 
-  return { can, isAdmin, role, permissions };
+  return { can, isAdmin, role };
 }

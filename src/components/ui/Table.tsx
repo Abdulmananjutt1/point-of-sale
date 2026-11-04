@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import { cn } from "@/lib/utils";
+import Pagination from "./Pagination";
 
 interface Column<T> {
   key: string;
@@ -12,6 +16,8 @@ interface TableProps<T> {
   data: T[];
   keyField: keyof T;
   emptyMessage?: string;
+  paginate?: boolean;
+  pageSize?: number;
 }
 
 export default function Table<T>({
@@ -19,9 +25,17 @@ export default function Table<T>({
   data,
   keyField,
   emptyMessage = "No data found",
+  paginate = false,
+  pageSize = 10,
 }: TableProps<T>) {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const displayData = paginate
+    ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+    : data;
+
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-200">
+    <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-gray-50 border-b border-gray-200">
@@ -39,7 +53,7 @@ export default function Table<T>({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {data.length === 0 ? (
+          {displayData.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
@@ -49,7 +63,7 @@ export default function Table<T>({
               </td>
             </tr>
           ) : (
-            data.map((row) => (
+            displayData.map((row) => (
               <tr
                 key={String(row[keyField])}
                 className="hover:bg-gray-50 transition-colors"
@@ -69,6 +83,15 @@ export default function Table<T>({
           )}
         </tbody>
       </table>
+
+      {paginate && (
+        <Pagination
+          currentPage={currentPage}
+          totalItems={data.length}
+          pageSize={pageSize}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 }
