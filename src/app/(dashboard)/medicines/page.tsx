@@ -220,7 +220,7 @@ function BookNowModal({ suggestion, suppliers, onClose, onBooked }: BookNowModal
               <div className="bg-white rounded-xl p-2.5 border border-slate-200 text-center">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Current Stock</p>
                 <p
-                  className={`text-lg font-black mt-0.5 ${
+                  className={`text-lg font-semibold mt-0.5 ${
                     suggestion.currentStock === 0 ? "text-rose-600" : "text-amber-600"
                   }`}
                 >
@@ -229,11 +229,11 @@ function BookNowModal({ suggestion, suppliers, onClose, onBooked }: BookNowModal
               </div>
               <div className="bg-white rounded-xl p-2.5 border border-slate-200 text-center">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Min Threshold</p>
-                <p className="text-lg font-black text-slate-700 mt-0.5">{suggestion.medicine.minStock}</p>
+                <p className="text-lg font-semibold text-slate-700 mt-0.5">{suggestion.medicine.minStock}</p>
               </div>
               <div className="bg-white rounded-xl p-2.5 border border-emerald-200 text-center">
                 <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Suggested</p>
-                <p className="text-lg font-black text-emerald-600 mt-0.5">{suggestion.suggestedQty}</p>
+                <p className="text-lg font-semibold text-emerald-600 mt-0.5">{suggestion.suggestedQty}</p>
               </div>
             </div>
           </div>
@@ -299,7 +299,7 @@ function BookNowModal({ suggestion, suppliers, onClose, onBooked }: BookNowModal
           {/* Order total */}
           <div className="bg-slate-50 rounded-xl px-4 py-3 flex items-center justify-between border border-slate-200">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Valuation</span>
-            <span className="text-base font-black text-slate-900">{formatCurrency(total)}</span>
+            <span className="text-base font-semibold text-slate-900">{formatCurrency(total)}</span>
           </div>
 
           <div>
@@ -766,7 +766,7 @@ function MedicinesContent() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Catalogue Items</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{medicines.length}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{medicines.length}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
                 <Boxes size={13} className="text-emerald-500" />
                 Active formulations
@@ -781,7 +781,7 @@ function MedicinesContent() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Out of Stock</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{alerts.outOfStock.length}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{alerts.outOfStock.length}</h3>
               <p
                 className={`text-xs mt-1 font-medium flex items-center gap-1 ${
                   alerts.outOfStock.length > 0 ? "text-rose-600 font-semibold" : "text-slate-500"
@@ -804,7 +804,7 @@ function MedicinesContent() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Low Stock Warnings</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{alerts.lowStock.length}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{alerts.lowStock.length}</h3>
               <p
                 className={`text-xs mt-1 font-medium flex items-center gap-1 ${
                   alerts.lowStock.length > 0 ? "text-amber-600 font-semibold" : "text-slate-500"
@@ -827,7 +827,7 @@ function MedicinesContent() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Expiry Risks</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">
                 {alerts.expired.length + alerts.expiringSoon.length}
               </h3>
               <p
@@ -888,7 +888,7 @@ function MedicinesContent() {
               <Filter size={14} />
               <span>Filters</span>
               {activeFilterCount > 0 && (
-                <span className="bg-white text-emerald-700 text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="bg-white text-emerald-700 text-[10px] font-medium rounded-full w-4 h-4 flex items-center justify-center">
                   {activeFilterCount}
                 </span>
               )}
@@ -1079,7 +1079,7 @@ function MedicinesContent() {
                               Current Stock
                             </span>
                             <span
-                              className={`text-base font-black ${
+                              className={`text-base font-semibold ${
                                 sug.currentStock === 0 ? "text-rose-600" : "text-amber-600"
                               }`}
                             >
@@ -1090,13 +1090,13 @@ function MedicinesContent() {
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
                               Min Required
                             </span>
-                            <span className="text-base font-black text-slate-700">{sug.medicine.minStock}</span>
+                            <span className="text-base font-semibold text-slate-700">{sug.medicine.minStock}</span>
                           </div>
                           <div className="bg-white p-2 rounded-xl border border-emerald-200">
                             <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider block">
                               Suggested Order
                             </span>
-                            <span className="text-base font-black text-emerald-700">{sug.suggestedQty}</span>
+                            <span className="text-base font-semibold text-emerald-700">{sug.suggestedQty}</span>
                           </div>
                         </div>
                       </div>
@@ -1222,7 +1222,7 @@ function MedicineRow({
             {med.name}
           </span>
           {med.requiresPrescription && (
-            <span className="text-[10px] font-black text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
+            <span className="text-[10px] font-medium text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
               Rx
             </span>
           )}
@@ -1254,7 +1254,7 @@ function MedicineRow({
       <td className="px-4 py-3.5">
         <div className="min-w-[100px]">
           <span
-            className={`font-black text-sm ${
+            className={`font-medium text-sm ${
               isOut ? "text-rose-600" : isLow ? "text-amber-600" : "text-slate-900"
             }`}
           >

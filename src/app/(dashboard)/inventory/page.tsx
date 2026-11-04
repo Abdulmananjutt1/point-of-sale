@@ -262,7 +262,7 @@ export default function InventoryPage() {
               <span className="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
                 <Warehouse size={22} />
               </span>
-              <h1 className="text-xl font-bold text-slate-900">Inventory Valuation & On-Hand Assets</h1>
+              <h1 className="text-xl font-semibold text-slate-900">Inventory Valuation & On-Hand Assets</h1>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Live warehouse asset tracking, procurement cost basis, retail sales projections, and stock corrections.
@@ -298,8 +298,8 @@ export default function InventoryPage() {
           {/* Inventory Cost Value */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Asset Valuation (Cost)</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.totalCost)}</h3>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Asset Valuation (Cost)</p>
+              <h3 className="text-xl font-semibold text-slate-900 mt-1">{formatCurrency(stats.totalCost)}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
                 <Boxes size={13} className="text-emerald-500" />
                 {stats.totalUnits.toLocaleString()} total units on hand
@@ -313,8 +313,8 @@ export default function InventoryPage() {
           {/* Retail Potential Value */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Retail Sales Potential</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.totalRetail)}</h3>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Retail Sales Potential</p>
+              <h3 className="text-xl font-semibold text-slate-900 mt-1">{formatCurrency(stats.totalRetail)}</h3>
               <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1 font-medium">
                 <Percent size={13} />
                 ~{stats.potentialMargin}% projected gross margin
@@ -328,8 +328,8 @@ export default function InventoryPage() {
           {/* Formulations Count */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Formulations</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{medicines.length}</h3>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Active Formulations</p>
+              <h3 className="text-xl font-semibold text-slate-900 mt-1">{medicines.length}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
                 <CheckCircle2 size={13} className="text-emerald-500" />
                 Registered in catalogue
@@ -343,8 +343,8 @@ export default function InventoryPage() {
           {/* Risk Alerts */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Discrepancy & Alerts</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{alerts.totalAlerts}</h3>
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Discrepancy & Alerts</p>
+              <h3 className="text-xl font-semibold text-slate-900 mt-1">{alerts.totalAlerts}</h3>
               <p
                 className={`text-xs mt-1 font-medium flex items-center gap-1 ${
                   alerts.totalAlerts > 0 ? "text-rose-600 font-semibold" : "text-slate-500"
@@ -532,11 +532,11 @@ function InventoryRow({
       {/* Medicine Name and Rx */}
       <td className="px-5 py-3.5">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-900 hover:text-emerald-600 transition-colors">
+          <span className="font-medium text-slate-900 hover:text-emerald-600 transition-colors">
             {med.name}
           </span>
           {med.requiresPrescription && (
-            <span className="text-[10px] font-black text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
+            <span className="text-[10px] font-medium text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
               Rx
             </span>
           )}
@@ -565,7 +565,7 @@ function InventoryRow({
         <div className="min-w-[100px]">
           <div className="flex items-baseline gap-1">
             <span
-              className={`font-black text-sm ${
+              className={`font-semibold text-sm ${
                 isOut ? "text-rose-600" : isLow ? "text-amber-600" : "text-slate-900"
               }`}
             >
@@ -580,7 +580,7 @@ function InventoryRow({
 
       {/* Valuation */}
       <td className="px-4 py-3.5 whitespace-nowrap">
-        <p className="font-bold text-slate-900 text-sm">{formatCurrency(stockValue)}</p>
+        <p className="font-medium text-slate-900 text-sm">{formatCurrency(stockValue)}</p>
         <p className="text-xs text-slate-400">
           {formatCurrency(med.purchasePrice)} / {med.unit.toLowerCase()}
         </p>

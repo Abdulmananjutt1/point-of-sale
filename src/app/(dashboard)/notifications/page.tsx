@@ -231,7 +231,7 @@ export default function NotificationsPage() {
           <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Notifications</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{total}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{total}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
                 <ShieldCheck size={13} className="text-emerald-500" />
                 Activity stream
@@ -246,7 +246,7 @@ export default function NotificationsPage() {
           <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Unread Alerts</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.unread}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.unread}</h3>
               <p
                 className={`text-xs mt-1 font-medium flex items-center gap-1 ${
                   stats.unread > 0 ? "text-amber-600 font-semibold" : "text-emerald-600"
@@ -276,7 +276,7 @@ export default function NotificationsPage() {
           <div className="bg-white p-4.5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Inventory Warnings</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">
                 {stats.stockAlerts + stats.expiryAlerts}
               </h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">

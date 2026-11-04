@@ -392,7 +392,7 @@ export default function PurchaseOrdersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Procurement</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.totalVolume)}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{formatCurrency(stats.totalVolume)}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1 font-medium">
                 <Boxes size={13} className="text-indigo-500" />
                 Across {stats.totalCount} total POs
@@ -407,7 +407,7 @@ export default function PurchaseOrdersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">In-Transit / Pending</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.inTransit}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.inTransit}</h3>
               <p className="text-xs text-blue-600 mt-1 flex items-center gap-1 font-medium">
                 <Truck size={13} />
                 Awaiting delivery & GRN
@@ -422,7 +422,7 @@ export default function PurchaseOrdersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Completed / Received</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.received}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.received}</h3>
               <p className="text-xs text-emerald-600 mt-1 flex items-center gap-1 font-medium">
                 <CheckCircle2 size={13} />
                 Stock added to inventory
@@ -437,7 +437,7 @@ export default function PurchaseOrdersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Draft POs</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.drafts}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.drafts}</h3>
               <p className="text-xs text-amber-600 mt-1 flex items-center gap-1 font-medium">
                 <Clock size={13} />
                 Requires supplier dispatch
@@ -637,7 +637,7 @@ export default function PurchaseOrdersPage() {
 
                           {/* Total Amount */}
                           <td className="px-4 py-4 text-right">
-                            <span className="font-black text-slate-900 text-sm">
+                            <span className="font-medium text-slate-900 text-sm">
                               {formatCurrency(po.totalAmount)}
                             </span>
                           </td>
@@ -913,7 +913,7 @@ export default function PurchaseOrdersPage() {
               </span>
               <div className="text-right">
                 <span className="text-xs text-slate-400 mr-2">Estimated Payable:</span>
-                <span className="text-lg font-black text-slate-900">
+                <span className="text-lg font-semibold text-slate-900">
                   {formatCurrency(poForm.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0))}
                 </span>
               </div>

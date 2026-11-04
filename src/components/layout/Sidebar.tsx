@@ -257,13 +257,13 @@ export default function Sidebar() {
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span
-                className="font-black text-base tracking-tight truncate leading-tight"
+                className="font-semibold text-base tracking-tight truncate leading-tight"
                 style={{ color: cfg.logoText }}
               >
                 {settings.pharmacyName || "PharmaPOS"}
               </span>
               <span
-                className="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase tracking-wider"
+                className="px-1.5 py-0.2 rounded text-[9px] font-semibold uppercase tracking-wider"
                 style={{
                   backgroundColor: cfg.isLight ? "#e2e8f0" : "rgba(255,255,255,0.12)",
                   color: cfg.isLight ? "#475569" : "rgba(255,255,255,0.85)",
@@ -306,7 +306,7 @@ export default function Sidebar() {
               {/* Group Title */}
               <div className="px-3 pb-1">
                 <p
-                  className="text-[10px] font-bold uppercase tracking-wider"
+                  className="text-[10px] font-medium uppercase tracking-wider"
                   style={{ color: cfg.muted }}
                 >
                   {group.title}
@@ -332,7 +332,7 @@ export default function Sidebar() {
                           }
                         : { color: cfg.text }
                     }
-                    className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 group"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 group"
                     onMouseEnter={(e) => {
                       if (!isActive) {
                         (e.currentTarget as HTMLElement).style.backgroundColor = cfg.hoverBg;
@@ -358,7 +358,7 @@ export default function Sidebar() {
 
                     {badge && (
                       <span
-                        className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider"
+                        className="px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider"
                         style={{
                           backgroundColor: isActive
                             ? "rgba(255,255,255,0.22)"
@@ -394,7 +394,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-2.5">
           {/* Cashier / Admin Avatar */}
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black shrink-0 shadow-xs"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-semibold shrink-0 shadow-xs"
             style={{
               backgroundColor: cfg.isLight ? "#e2e8f0" : activeSwatch,
               color: cfg.isLight ? "#0f172a" : "#ffffff",
@@ -406,7 +406,7 @@ export default function Sidebar() {
           {/* User Meta */}
           <div className="flex-1 min-w-0">
             <p
-              className="text-xs font-bold truncate leading-tight"
+              className="text-xs font-medium truncate leading-tight"
               style={{ color: cfg.logoText }}
               title={currentUser?.name}
             >
@@ -414,7 +414,7 @@ export default function Sidebar() {
             </p>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span
-                className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase tracking-wide"
+                className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-medium uppercase tracking-wide"
                 style={{
                   backgroundColor: isAdmin
                     ? "rgba(239,68,68,0.18)"

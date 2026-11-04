@@ -303,7 +303,7 @@ export default function CustomersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Registered Patients</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.total}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.total}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                 <ShieldCheck size={13} className="text-emerald-500" />
                 Active directory
@@ -318,7 +318,7 @@ export default function CustomersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Lifetime Purchases</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.totalRevenue)}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{formatCurrency(stats.totalRevenue)}</h3>
               <p className="text-xs text-emerald-600 mt-1 font-medium flex items-center gap-1">
                 <TrendingUp size={13} />
                 Accumulated volume
@@ -333,7 +333,7 @@ export default function CustomersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">VIP Members</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.vipCount}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.vipCount}</h3>
               <p className="text-xs text-violet-600 mt-1 font-medium flex items-center gap-1">
                 <Sparkles size={13} />
                 Spending &ge; Rs 10,000
@@ -348,7 +348,7 @@ export default function CustomersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Value / Patient</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{formatCurrency(stats.avgSpend)}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{formatCurrency(stats.avgSpend)}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                 <ShoppingBag size={13} className="text-amber-500" />
                 Per registered patient
@@ -677,7 +677,7 @@ export default function CustomersPage() {
             {/* Header info */}
             <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg border ${getAvatarColor(
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center font-medium text-lg border ${getAvatarColor(
                   selectedCustomer.name
                 )} shadow-xs flex-shrink-0`}
               >
@@ -702,7 +702,7 @@ export default function CustomersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-100">
                 <p className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">Lifetime Volume</p>
-                <h4 className="text-xl font-black text-emerald-700 mt-1">
+                <h4 className="text-xl font-semibold text-emerald-700 mt-1">
                   {formatCurrency(selectedCustomer.totalPurchases || 0)}
                 </h4>
               </div>

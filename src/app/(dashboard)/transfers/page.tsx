@@ -468,7 +468,7 @@ export default function TransfersPage() {
           <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-slate-500">Inward Borrowed</span>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">
                 {stats.borrowedCount}{" "}
                 <span className="text-xs font-medium text-slate-400">pending</span>
               </h3>
@@ -485,7 +485,7 @@ export default function TransfersPage() {
           <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-slate-500">Outward Lent</span>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">
                 {stats.lentCount}{" "}
                 <span className="text-xs font-medium text-slate-400">pending</span>
               </h3>
@@ -502,7 +502,7 @@ export default function TransfersPage() {
           <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-slate-500">Branch Transfers</span>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">
                 {stats.branchCount}
               </h3>
               <p className="text-xs text-slate-400 mt-1">Inter-branch logistics</p>
@@ -516,7 +516,7 @@ export default function TransfersPage() {
           <div className="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-xs flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold text-slate-500">Settled & Cleared</span>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">
                 {stats.settledCount}
               </h3>
               <p className="text-xs text-emerald-600 mt-1">Returned or paid</p>
@@ -722,7 +722,7 @@ export default function TransfersPage() {
 
                         {/* Value */}
                         <td className="py-3 px-3">
-                          <span className="font-black text-slate-900 text-xs">
+                          <span className="font-medium text-slate-900 text-xs">
                             {formatCurrency(totalVal)}
                           </span>
                         </td>
@@ -1307,7 +1307,7 @@ export default function TransfersPage() {
             >
               {/* Slip Header */}
               <div className="text-center border-b pb-3 border-slate-200">
-                <h2 className="text-base font-black tracking-tight text-slate-900">
+                <h2 className="text-base font-semibold tracking-tight text-slate-900">
                   {settings.pharmacyName || "PharmaPOS Pharmacy"}
                 </h2>
                 <p className="text-[11px] text-slate-500">{settings.address || "Main Branch"}</p>

@@ -339,7 +339,7 @@ export default function MedicineGrid({
                                 </span>
                               )}
                               {med.requiresPrescription && (
-                                <span className="text-[9px] font-black text-violet-700 bg-violet-100 px-1 py-0.2 rounded border border-violet-200">
+                                <span className="text-[9px] font-medium text-violet-700 bg-violet-100 px-1 py-0.2 rounded border border-violet-200">
                                   Rx
                                 </span>
                               )}
@@ -493,7 +493,7 @@ function MedicineCard({
             </span>
 
             {med.requiresPrescription && (
-              <span className="text-[10px] font-black text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
+              <span className="text-[10px] font-medium text-violet-700 bg-violet-100 px-1.5 py-0.5 rounded border border-violet-200">
                 Rx
               </span>
             )}
@@ -561,7 +561,7 @@ function MedicineCard({
         {/* Price & Action Row */}
         <div className="flex items-center justify-between gap-2 pt-0.5">
           <div>
-            <span className="text-sm font-black text-slate-900">
+            <span className="text-sm font-semibold text-slate-900">
               {formatCurrency(med.sellingPrice)}
             </span>
             <span className="text-[10px] text-slate-400 ml-1">

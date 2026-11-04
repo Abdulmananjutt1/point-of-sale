@@ -9,6 +9,18 @@ body {
   background-color: var(--page-bg, #f1f5f9);
   color: var(--page-text, #0f172a);
   transition: background-color 0.25s ease, color 0.25s ease;
+  font-weight: 400;
+}
+
+/* Reduce extreme bold weights globally */
+.font-black {
+  font-weight: 700 !important;
+}
+.font-extrabold {
+  font-weight: 600 !important;
+}
+.font-bold {
+  font-weight: 600 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -300,7 +312,7 @@ html.theme-white {
 .theme-sidebar-active {
   background-color: var(--sidebar-active-bg) !important;
   color: var(--sidebar-active-text) !important;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .theme-sidebar-muted {

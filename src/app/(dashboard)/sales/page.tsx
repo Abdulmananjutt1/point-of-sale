@@ -438,7 +438,7 @@ export default function SalesPage() {
             <ShoppingCart size={15} className={tab === "pos" ? "text-emerald-600" : "text-slate-400"} />
             <span>POS Register</span>
             {cart.length > 0 && (
-              <span className="bg-emerald-600 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full">
+              <span className="bg-emerald-600 text-white text-[10px] font-medium px-1.5 py-0.2 rounded-full">
                 {cart.length}
               </span>
             )}

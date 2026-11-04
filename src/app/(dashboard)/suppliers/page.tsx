@@ -298,7 +298,7 @@ export default function SuppliersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Vendors</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.total}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.total}</h3>
               <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
                 <ShieldCheck size={13} className="text-blue-500" />
                 Registered partners
@@ -313,7 +313,7 @@ export default function SuppliersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Direct Representatives</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.withContactPerson}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.withContactPerson}</h3>
               <p className="text-xs text-emerald-600 mt-1 font-medium flex items-center gap-1">
                 <UserCheck size={13} />
                 Assigned agents
@@ -328,7 +328,7 @@ export default function SuppliersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Digital / Email Reach</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.withEmail}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.withEmail}</h3>
               <p className="text-xs text-indigo-600 mt-1 font-medium flex items-center gap-1">
                 <Mail size={13} />
                 Verified email routing
@@ -343,7 +343,7 @@ export default function SuppliersPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Physical Depots</p>
-              <h3 className="text-2xl font-black text-slate-900 mt-1">{stats.withAddress}</h3>
+              <h3 className="text-2xl font-semibold text-slate-900 mt-1">{stats.withAddress}</h3>
               <p className="text-xs text-amber-600 mt-1 flex items-center gap-1 font-medium">
                 <MapPin size={13} />
                 Warehouse addresses
@@ -605,7 +605,7 @@ export default function SuppliersPage() {
             {/* Header info */}
             <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center font-black text-lg border ${getAvatarColor(
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center font-medium text-lg border ${getAvatarColor(
                   selectedSupplier.name
                 )} shadow-xs flex-shrink-0`}
               >

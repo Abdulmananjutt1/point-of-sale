@@ -434,7 +434,7 @@ export default function DashboardPage() {
               <div className="h-[220px] flex items-center justify-center animate-pulse">
                 <div className="w-full h-full bg-slate-50 rounded-xl" />
               </div>
-            ) : data.trend.length > 0 && data.trend.some((t) => t.revenue > 0) ? (
+            ) : data.trend?.length > 0 && data.trend.some((t) => t.revenue > 0) ? (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={data.trend} margin={{ left: -10, right: 10, top: 10, bottom: 0 }}>
                   <defs>
@@ -502,7 +502,7 @@ export default function DashboardPage() {
                     <div key={i} className="h-8 bg-slate-100 rounded-xl" />
                   ))}
                 </div>
-              ) : data.paymentBreakdown.length > 0 ? (
+              ) : (data.paymentBreakdown ?? []).length > 0 ? (
                 <div className="pt-1">
                   <ResponsiveContainer width="100%" height={120}>
                     <BarChart
@@ -527,7 +527,7 @@ export default function DashboardPage() {
                         contentStyle={{ borderRadius: 12, fontSize: 12 }}
                       />
                       <Bar dataKey="count" radius={[0, 6, 6, 0]}>
-                        {data.paymentBreakdown.map((entry) => (
+                        {(data.paymentBreakdown ?? []).map((entry) => (
                           <Cell
                             key={entry.method}
                             fill={PAYMENT_COLORS[entry.method] ?? "#64748b"}
@@ -538,7 +538,7 @@ export default function DashboardPage() {
                   </ResponsiveContainer>
 
                   <div className="space-y-2 mt-3 pt-3 border-t border-slate-100">
-                    {data.paymentBreakdown.map((e) => (
+                    {(data.paymentBreakdown ?? []).map((e) => (
                       <div key={e.method} className="flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2">
                           <div
@@ -589,17 +589,17 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            ) : data.topMedicines.length === 0 ? (
+            ) : (data.topMedicines ?? []).length === 0 ? (
               <div className="py-12 text-center text-slate-400">
                 <Boxes size={32} className="mx-auto mb-2 text-slate-300" strokeWidth={1.5} />
                 <p className="text-xs">No sales recorded yet for this date range</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {data.topMedicines.slice(0, 5).map((med, i) => (
+                {(data.topMedicines ?? []).slice(0, 5).map((med, i) => (
                   <div key={med.medicineId} className="flex items-center gap-3">
                     <span
-                      className={`w-6 h-6 text-xs font-black rounded-lg flex items-center justify-center shrink-0 ${
+                      className={`w-6 h-6 text-xs font-medium rounded-lg flex items-center justify-center shrink-0 ${
                         i === 0
                           ? "bg-amber-100 text-amber-800"
                           : i === 1
@@ -630,7 +630,7 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     </div>
-                    <p className="text-sm font-black text-slate-900 shrink-0">
+                    <p className="text-sm font-semibold text-slate-900 shrink-0">
                       {formatCurrency(med.revenue)}
                     </p>
                   </div>
@@ -646,12 +646,12 @@ export default function DashboardPage() {
                 <h3 className="text-base font-bold text-slate-900">Batch Expiry Watchlist</h3>
                 <p className="text-xs text-slate-500">Expired batches or expiring within 30 days</p>
               </div>
-              {!isLoading && data.nearExpiry.length > 0 && (
+              {!isLoading && (data.nearExpiry ?? []).length > 0 && (
                 <Link
                   href="/inventory?filter=expiring"
                   className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1"
                 >
-                  View All ({data.nearExpiry.length}) <ChevronRight size={13} />
+                  View All ({(data.nearExpiry ?? []).length}) <ChevronRight size={13} />
                 </Link>
               )}
             </div>
@@ -668,7 +668,7 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            ) : data.nearExpiry.length === 0 ? (
+            ) : (data.nearExpiry ?? []).length === 0 ? (
               <div className="py-12 text-center text-slate-400">
                 <CheckCircle2 size={36} className="mx-auto mb-2 text-emerald-500" strokeWidth={1.5} />
                 <p className="text-sm font-bold text-slate-800">All Batches Healthy</p>
@@ -676,7 +676,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-2.5">
-                {data.nearExpiry.slice(0, 5).map((med) => (
+                {(data.nearExpiry ?? []).slice(0, 5).map((med) => (
                   <div
                     key={med.id}
                     className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 rounded-xl px-1.5 transition-colors"
@@ -703,7 +703,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Low Stock Items Section */}
-        {!isLoading && data.lowStockItems.length > 0 && (
+        {!isLoading && (data.lowStockItems ?? []).length > 0 && (
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
             <div className="p-5 pb-3 flex items-center justify-between border-b border-slate-100">
               <div>
@@ -730,13 +730,13 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {data.lowStockItems.slice(0, 5).map((item) => (
+                  {(data.lowStockItems ?? []).slice(0, 5).map((item) => (
                     <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="px-5 py-3 font-bold text-slate-900">{item.name}</td>
                       <td className="px-4 py-3 text-slate-500 text-xs">{item.brand}</td>
                       <td className="px-4 py-3 text-center">
                         <span
-                          className={`font-black text-sm ${
+                          className={`font-medium text-sm ${
                             item.stock === 0 ? "text-rose-600" : "text-amber-600"
                           }`}
                         >
@@ -819,7 +819,7 @@ export default function DashboardPage() {
                           {s.paymentMethod}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-black text-slate-900 text-right">
+                      <td className="px-4 py-3 font-medium text-slate-900 text-right">
                         {formatCurrency(s.total)}
                       </td>
                       <td className="px-4 py-3">
@@ -957,7 +957,7 @@ function KpiCard({
         </div>
       </div>
       <div className="mt-2">
-        <p className="text-xl font-black text-slate-900 leading-tight">{value}</p>
+        <p className="text-xl font-semibold text-slate-900 leading-tight">{value}</p>
         {sub && <p className="mt-1 text-xs text-slate-500 font-medium truncate">{sub}</p>}
       </div>
     </div>
@@ -981,7 +981,7 @@ function SmallStat({
         </div>
         <span className="text-xs font-semibold text-slate-500">{label}</span>
       </div>
-      <span className="text-lg font-black text-slate-900">{value.toLocaleString()}</span>
+      <span className="text-lg font-semibold text-slate-900">{value.toLocaleString()}</span>
     </div>
   );
 }
@@ -1032,7 +1032,7 @@ function AlertTile({
         <Icon size={20} className={`${styles.icon} shrink-0`} />
       </div>
       <div>
-        <p className={`text-lg font-black ${styles.text}`}>{count}</p>
+        <p className={`text-lg font-semibold ${styles.text}`}>{count}</p>
         <p className={`text-xs font-medium ${styles.sub}`}>{label}</p>
       </div>
     </Link>
