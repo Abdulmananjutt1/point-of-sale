@@ -23,6 +23,8 @@ import {
   Sparkles,
   ShieldCheck,
   Activity,
+  AlarmClock,
+  UserCog,
 } from "lucide-react";
 import { usePharmacyStore } from "@/store";
 import { usePermissions, PERMISSIONS, PermissionKey } from "@/hooks/usePermissions";
@@ -190,11 +192,13 @@ const navGroups: NavGroup[] = [
   {
     title: "MANAGEMENT & AUDIT",
     items: [
-      { label: "Customers", href: "/customers", icon: Users, permission: PERMISSIONS.CUSTOMERS_READ },
-      { label: "Returns & Refunds", href: "/returns", icon: RotateCcw, permission: PERMISSIONS.RETURNS_READ },
-      { label: "Reports & Analytics", href: "/reports", icon: BarChart2, permission: PERMISSIONS.REPORTS_VIEW },
-      { label: "Login History", href: "/login-history", icon: Clock, permission: PERMISSIONS.LOGIN_HISTORY_VIEW },
-      { label: "Settings", href: "/settings", icon: Settings, permission: PERMISSIONS.SETTINGS_VIEW },
+      { label: "Customers",        href: "/customers",     icon: Users,         permission: PERMISSIONS.CUSTOMERS_READ },
+      { label: "Returns & Refunds",href: "/returns",       icon: RotateCcw,     permission: PERMISSIONS.RETURNS_READ },
+      { label: "Reports & Analytics",href: "/reports",     icon: BarChart2,     permission: PERMISSIONS.REPORTS_VIEW },
+      { label: "Shift Management", href: "/shifts",        icon: AlarmClock,    permission: PERMISSIONS.CASH_SHIFTS_VIEW },
+      { label: "User Management",  href: "/users",         icon: UserCog,       permission: PERMISSIONS.USERS_MANAGE },
+      { label: "Login History",    href: "/login-history", icon: Clock,         permission: PERMISSIONS.LOGIN_HISTORY_VIEW },
+      { label: "Settings",         href: "/settings",      icon: Settings,      permission: PERMISSIONS.SETTINGS_VIEW },
     ],
   },
 ];
@@ -209,10 +213,19 @@ export default function Sidebar() {
   const activeSwatch = THEMES.find((t) => t.key === settings.themeColor)?.swatch ?? "#4f46e5";
 
   const [mounted, setMounted] = useState(false);
+  const [liveUser, setLiveUser] = useState<{ name: string; email: string } | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    // Load real user info from localStorage (saved at login)
+    const saved = authService.getUser();
+    if (saved) setLiveUser({ name: saved.name, email: saved.email });
   }, []);
+
+  // Display name: prefer localStorage user → store user → role default
+  const displayName  = liveUser?.name  ?? currentUser?.name  ?? (isAdmin ? "Administrator" : "Cashier Staff");
+  const displayEmail = liveUser?.email ?? currentUser?.email ?? "";
+  const avatarLetter = displayName[0]?.toUpperCase() ?? (isAdmin ? "A" : "C");
 
   const handleLogout = () => {
     authService.removeToken();
@@ -392,46 +405,57 @@ export default function Sidebar() {
         className="p-3.5 flex-shrink-0"
       >
         <div className="flex items-center gap-2.5">
-          {/* Cashier / Admin Avatar */}
+          {/* Avatar with initial */}
           <div
-            className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-semibold shrink-0 shadow-xs"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 shadow-xs"
             style={{
-              backgroundColor: cfg.isLight ? "#e2e8f0" : activeSwatch,
-              color: cfg.isLight ? "#0f172a" : "#ffffff",
+              backgroundColor: isAdmin
+                ? cfg.isLight ? "#fee2e2" : "rgba(239,68,68,0.25)"
+                : cfg.isLight ? "#d1fae5" : activeSwatch,
+              color: isAdmin
+                ? cfg.isLight ? "#dc2626" : "#fca5a5"
+                : cfg.isLight ? "#065f46" : "#ffffff",
             }}
           >
-            {currentUser?.name?.[0]?.toUpperCase() ?? (isAdmin ? "A" : "C")}
+            {avatarLetter}
           </div>
 
           {/* User Meta */}
           <div className="flex-1 min-w-0">
             <p
-              className="text-xs font-medium truncate leading-tight"
+              className="text-xs font-semibold truncate leading-tight"
               style={{ color: cfg.logoText }}
-              title={currentUser?.name}
+              title={displayName}
             >
-              {currentUser?.name ?? (isAdmin ? "Administrator" : "Cashier Staff")}
+              {displayName}
             </p>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span
-                className="inline-flex items-center px-1.5 py-0.2 rounded text-[9px] font-medium uppercase tracking-wide"
-                style={{
-                  backgroundColor: isAdmin
-                    ? "rgba(239,68,68,0.18)"
-                    : "rgba(16,185,129,0.18)",
-                  color: isAdmin ? "#ef4444" : "#10b981",
-                }}
+            {displayEmail && (
+              <p
+                className="text-[10px] truncate mt-0.5"
+                style={{ color: cfg.muted }}
+                title={displayEmail}
               >
-                {isAdmin ? "Admin" : "Cashier"}
-              </span>
-            </div>
+                {displayEmail}
+              </p>
+            )}
+            <span
+              className="inline-flex items-center mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide"
+              style={{
+                backgroundColor: isAdmin
+                  ? "rgba(239,68,68,0.18)"
+                  : "rgba(16,185,129,0.18)",
+                color: isAdmin ? "#ef4444" : "#10b981",
+              }}
+            >
+              {isAdmin ? "Admin" : "Cashier"}
+            </span>
           </div>
 
-          {/* Logout Action */}
+          {/* Logout */}
           <button
             onClick={handleLogout}
             title="Sign Out"
-            className="p-2 rounded-xl transition-all duration-150"
+            className="p-2 rounded-xl transition-all duration-150 shrink-0"
             style={{ color: cfg.muted }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.color = "#ef4444";

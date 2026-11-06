@@ -29,6 +29,9 @@ export const PERMISSIONS = {
   STOCK_COUNT_VIEW:      "stock_count.view",
   STOCK_COUNT_MANAGE:    "stock_count.manage",
   LOGIN_HISTORY_VIEW:    "login_history.view",
+  CASH_SHIFTS_VIEW:      "cash_shifts.view",
+  CASH_SHIFTS_MANAGE:    "cash_shifts.manage",
+  USERS_MANAGE:          "users.manage",
 } as const;
 
 export type PermissionKey = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -49,6 +52,8 @@ export function usePermissions() {
       PERMISSIONS.RETURNS_READ,
       PERMISSIONS.RETURNS_CREATE,
       PERMISSIONS.DASHBOARD_VIEW,
+      PERMISSIONS.CASH_SHIFTS_VIEW,
+      PERMISSIONS.CASH_SHIFTS_MANAGE,
     ];
     return cashierPermissions.includes(permission);
   }, [isAdmin]);

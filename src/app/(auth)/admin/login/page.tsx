@@ -41,6 +41,7 @@ export default function AdminLoginPage() {
       }
 
       authService.saveToken(token, user.role);
+      authService.saveUser(user);
       toastSuccess(`Welcome, ${user.name}!`);
       // Full redirect to guarantee cookies and state sync across middleware and dashboard
       window.location.href = "/";

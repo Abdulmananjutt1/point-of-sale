@@ -33,6 +33,13 @@ export const authService = {
     }
   },
 
+  // Save full user info after login
+  saveUser(user: AuthUser) {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("currentUser", JSON.stringify(user));
+    }
+  },
+
   getToken(): string | null {
     if (typeof window === "undefined") return null;
     return localStorage.getItem("token");
@@ -43,10 +50,30 @@ export const authService = {
     return localStorage.getItem("userRole");
   },
 
+  // Get saved user object
+  getUser(): AuthUser | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("currentUser");
+      return raw ? (JSON.parse(raw) as AuthUser) : null;
+    } catch { return null; }
+  },
+
+  // Get user ID from JWT payload
+  getUserId(): string | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return null;
+      return JSON.parse(atob(token.split(".")[1])).id ?? null;
+    } catch { return null; }
+  },
+
   removeToken() {
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");
       localStorage.removeItem("userRole");
+      localStorage.removeItem("currentUser");
       document.cookie = "token=; path=/; max-age=0";
       document.cookie = "userRole=; path=/; max-age=0";
     }
