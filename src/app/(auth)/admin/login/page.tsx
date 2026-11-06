@@ -74,12 +74,12 @@ export default function AdminLoginPage() {
       <div className="absolute bottom-40 right-64 w-72 h-72 bg-gradient-to-tl from-blue-200/8 to-transparent rounded-full blur-2xl opacity-30 animate-bounce pointer-events-none select-none -z-0" style={{ animationDuration: '5s' }} />
 
       {/* LEFT — Premium Features (Desktop Only) */}
-      <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-slate-800">
+      <div className="hidden lg:flex w-1/2 flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700">
         {/* Decorative Background - Animated Blobs */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none select-none">
+        <div className="absolute inset-0 opacity-15 pointer-events-none select-none">
           <div className="absolute top-1/3 -right-40 w-80 h-80 bg-white rounded-full blur-3xl animate-pulse" style={{ animationDuration: '3s' }} />
-          <div className="absolute -bottom-32 left-1/4 w-96 h-96 bg-cyan-300 rounded-full blur-3xl opacity-30 animate-bounce" style={{ animationDuration: '4s' }} />
-          <div className="absolute top-1/2 -left-32 w-64 h-64 bg-blue-300 rounded-full blur-2xl opacity-10 animate-pulse" style={{ animationDuration: '5s' }} />
+          <div className="absolute -bottom-32 left-1/4 w-96 h-96 bg-sky-200 rounded-full blur-3xl opacity-40 animate-bounce" style={{ animationDuration: '4s' }} />
+          <div className="absolute top-1/2 -left-32 w-64 h-64 bg-blue-200 rounded-full blur-2xl opacity-20 animate-pulse" style={{ animationDuration: '5s' }} />
         </div>
 
         <div className="relative z-10 space-y-12">
@@ -99,7 +99,7 @@ export default function AdminLoginPage() {
             <h2 className="text-4xl lg:text-5xl font-bold text-white mb-3 leading-tight">
               Manage Your<br />Pharmacy
             </h2>
-            <p className="text-blue-100 text-base">Complete control over inventory, sales, staff, and analytics.</p>
+            <p className="text-blue-50 text-base">Complete control over inventory, sales, staff, and analytics.</p>
           </div>
 
           {/* Feature Grid */}
@@ -112,12 +112,12 @@ export default function AdminLoginPage() {
             ].map(({ icon: Icon, title }, idx) => (
               <div 
                 key={title} 
-                className="bg-white/5 hover:bg-white/15 transition-all duration-300 rounded-lg p-3 border border-white/10 hover:border-white/30 hover:shadow-lg hover:-translate-y-1 group cursor-pointer"
+                className="bg-white/10 hover:bg-white/20 transition-all duration-300 rounded-lg p-3 border border-white/20 hover:border-white/40 hover:shadow-lg hover:-translate-y-1 group cursor-pointer"
                 style={{ 
                   animation: `fadeInUp 0.6s ease-out ${idx * 0.1}s both`,
                 }}
               >
-                <Icon size={18} className="text-blue-300 mb-2 group-hover:text-blue-200 transition-colors" />
+                <Icon size={18} className="text-blue-100 mb-2 group-hover:text-white transition-colors" />
                 <p className="text-white font-semibold text-sm group-hover:translate-x-0.5 transition-transform">{title}</p>
               </div>
             ))}
@@ -125,7 +125,7 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-blue-200/50 text-xs">© 2026 PharmaPOS. Secure Admin Access.</p>
+        <p className="text-blue-100/60 text-xs">© 2026 PharmaPOS. Secure Admin Access.</p>
       </div>
 
       {/* RIGHT — Login Form (Elevated with relative z-10 for guaranteed clickability) */}
