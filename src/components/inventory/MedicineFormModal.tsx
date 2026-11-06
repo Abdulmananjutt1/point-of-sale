@@ -15,6 +15,7 @@ const DEFAULT_FORM: FormData = {
   genericName: "",
   brand: "",
   category: "Tablet",
+  barcode: "",
   batchNumber: "",
   expiryDate: "",
   purchasePrice: 0,
@@ -186,7 +187,7 @@ export default function MedicineFormModal({
         </div>
 
         {/* ── Section: Batch & Expiry ─────────────────────── */}
-        <SectionLabel>Batch & Expiry</SectionLabel>
+        <SectionLabel>Batch, Barcode & Expiry</SectionLabel>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
           <Input
             id="med-batch"
@@ -195,6 +196,13 @@ export default function MedicineFormModal({
             value={form.batchNumber}
             onChange={(e) => set("batchNumber", e.target.value)}
             error={errors.batchNumber}
+          />
+          <Input
+            id="med-barcode"
+            label="Barcode (EAN / UPC)"
+            placeholder="Scan or type barcode…"
+            value={form.barcode ?? ""}
+            onChange={(e) => set("barcode", e.target.value || undefined)}
           />
           <Input
             id="med-expiry"

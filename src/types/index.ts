@@ -5,6 +5,7 @@ export interface Medicine {
   genericName: string;
   brand: string;
   category: MedicineCategory;
+  barcode?: string;
   batchNumber: string;
   expiryDate: string;
   purchasePrice: number;

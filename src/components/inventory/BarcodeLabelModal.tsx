@@ -40,7 +40,8 @@ export default function BarcodeLabelModal({ isOpen, onClose, medicines }: Barcod
   const handlePrint = () => {
     const labels = selectedList.flatMap(({ med, qty }) =>
       Array.from({ length: qty }).map(() => {
-        const barcodeId = med.id.slice(0, 12);
+        // Use actual barcode if available, else fallback to medicine ID
+        const barcodeId = (med.barcode ?? med.id).slice(0, 13);
         return `
           <div style="width: 2.5in; height: 1.5in; border: 1px solid #000; padding: 0.08in; margin: 0.1in; display: inline-block; font-family: 'Arial', sans-serif; box-sizing: border-box; page-break-inside: avoid;">
             <div style="font-size: 9pt; font-weight: bold; line-height: 1.2; margin-bottom: 0.05in; text-align: left;">${med.name}</div>

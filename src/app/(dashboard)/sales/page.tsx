@@ -53,10 +53,11 @@ import {
 import { medicineService } from "@/services/medicineService";
 import { customerService } from "@/services/customerService";
 import { saleService } from "@/services/saleService";
+import { heldSaleService } from "@/services/heldSaleService";
 import { cashShiftService } from "@/services/cashShiftService";
 import { apiPost } from "@/lib/apiClient";
 import { toastApiError, toastSuccess } from "@/lib/toast";
-import { generateId, generateInvoiceNumber } from "@/lib/utils";
+import { generateInvoiceNumber } from "@/lib/utils";
 
 type Tab = "pos" | "history";
 
@@ -106,7 +107,7 @@ export default function SalesPage() {
     async function load() {
       setDataLoading(true);
       try {
-        const [medRes, cusRes, salesRes] = await Promise.all([
+        const [medRes, cusRes, salesRes, heldRes] = await Promise.all([
           medicineService.getAll({ limit: 500 }).catch((e) => {
             console.error("Failed to load medicines:", e);
             toastApiError(e);
@@ -120,10 +121,12 @@ export default function SalesPage() {
             console.error("Failed to load sales:", e);
             return { sales: [], total: 0, page: 1, totalPages: 1 };
           }),
+          heldSaleService.getAll().catch(() => [] as HeldSale[]),
         ]);
         setMedicines(medRes.medicines);
         setCustomers(cusRes.customers);
         setSales(salesRes.sales);
+        setHeldSales(heldRes);
 
         cashShiftService
           .getCurrent()
@@ -203,57 +206,92 @@ export default function SalesPage() {
   }, []);
 
   // ── Hold / Resume ──────────────────────────────────────────────────────────
-  const holdSale = useCallback(() => {
+  const holdSale = useCallback(async () => {
     if (cart.length === 0) return;
     const label = `Sale ${new Date().toLocaleTimeString("en-PK", {
       hour: "2-digit",
       minute: "2-digit",
     })}`;
-    const held: HeldSale = {
-      id: `HLD${generateId()}`,
-      label,
-      cart: [...cart],
-      customerId: selectedCustomer?.id,
-      customerName: selectedCustomer?.name ?? "Walk-in",
-      discount: discountState.discountAmount,
-      heldAt: new Date().toISOString(),
-    };
-    setHeldSales((prev) => [held, ...prev]);
-    setCart([]);
-    setSelectedCustomer(null);
-    discountState.reset();
-    toastSuccess("Sale parked on hold — resume anytime");
+    try {
+      const held = await heldSaleService.create({
+        label,
+        customerId:   selectedCustomer?.id,
+        customerName: selectedCustomer?.name ?? "Walk-in",
+        discount:     discountState.discountAmount,
+        items:        [...cart],
+      });
+      setHeldSales((prev) => [held, ...prev]);
+      setCart([]);
+      setSelectedCustomer(null);
+      discountState.reset();
+      toastSuccess("Sale parked on hold — resume anytime");
+    } catch (err) {
+      toastApiError(err);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cart, selectedCustomer, discountState.discountAmount]);
 
   const resumeHeld = useCallback(
-    (heldId: string) => {
+    async (heldId: string) => {
       const held = heldSales.find((h) => h.id === heldId);
       if (!held) return;
       const customer = held.customerId
         ? customers.find((c) => c.id === held.customerId) ?? null
         : null;
+      // Restore cart state
       setCart([...held.cart]);
       setSelectedCustomer(customer);
+      // Remove from server + local state
+      try {
+        await heldSaleService.remove(heldId);
+      } catch {
+        // silent — we still resume cart even if API fails
+      }
       setHeldSales((prev) => prev.filter((h) => h.id !== heldId));
     },
     [heldSales, customers]
   );
 
-  const deleteHeld = useCallback((heldId: string) => {
+  const deleteHeld = useCallback(async (heldId: string) => {
+    try {
+      await heldSaleService.remove(heldId);
+    } catch {
+      // silent
+    }
     setHeldSales((prev) => prev.filter((h) => h.id !== heldId));
   }, []);
 
   // ── Barcode scanner ────────────────────────────────────────────────────────
   const handleScanCode = useCallback(
-    (code: string) => {
-      const med = medicines.find(
+    async (code: string) => {
+      const trimmed = code.trim();
+      if (!trimmed) return;
+
+      // 1. First try exact barcode match from local loaded medicines
+      let med = medicines.find(
         (m) =>
-          m.id.toLowerCase() === code.toLowerCase() ||
-          m.batchNumber?.toLowerCase() === code.toLowerCase()
+          m.barcode?.toLowerCase() === trimmed.toLowerCase() ||
+          m.id.toLowerCase() === trimmed.toLowerCase() ||
+          m.batchNumber?.toLowerCase() === trimmed.toLowerCase()
       );
+
+      // 2. If not in local list, hit the barcode API (handles newly added medicines)
       if (!med) {
-        toastApiError(new Error(`No medicine found for: ${code}`));
+        try {
+          med = await medicineService.findByBarcode(trimmed);
+          // Add to local list so future scans are instant
+          if (med) {
+            setMedicines((prev) =>
+              prev.some((m) => m.id === med!.id) ? prev : [med!, ...prev]
+            );
+          }
+        } catch {
+          // Not found on server either
+        }
+      }
+
+      if (!med) {
+        toastApiError(new Error(`No medicine found for: ${trimmed}`));
         return;
       }
       if (med.stock === 0) {
@@ -261,7 +299,7 @@ export default function SalesPage() {
         return;
       }
       addToCart(med);
-      toastSuccess(`${med.name} scanned into cart`);
+      toastSuccess(`✓ ${med.name} added`);
     },
     [medicines, addToCart]
   );

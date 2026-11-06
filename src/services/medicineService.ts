@@ -9,6 +9,7 @@ function mapMedicine(m: any): Medicine {
     genericName:          m.genericName        ?? m.generic_name        ?? "",
     brand:                m.brand              ?? "",
     category:             m.category           ?? "Other",
+    barcode:              m.barcode            ?? undefined,
     batchNumber:          m.batchNumber        ?? m.batch_number        ?? "",
     expiryDate:           typeof m.expiryDate === "string"
                             ? m.expiryDate
@@ -96,5 +97,11 @@ export const medicineService = {
 
   async delete(id: string): Promise<void> {
     await apiDelete(`/medicines/${id}`);
+  },
+
+  // Fast barcode lookup — calls dedicated backend endpoint
+  async findByBarcode(barcode: string): Promise<Medicine> {
+    const raw = await apiGet<unknown>(`/medicines/barcode/${encodeURIComponent(barcode)}`);
+    return mapMedicine(raw);
   },
 };

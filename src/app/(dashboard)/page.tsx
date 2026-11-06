@@ -52,11 +52,9 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { toastApiError, toastSuccess } from "@/lib/toast";
 import { apiGet, apiPost } from "@/lib/apiClient";
 
-type DateRange = "today" | "yesterday" | "7d" | "30d";
+type DateRange = "7d" | "30d";
 
 const DATE_RANGES: { key: DateRange; label: string }[] = [
-  { key: "today", label: "Today" },
-  { key: "yesterday", label: "Yesterday" },
   { key: "7d", label: "Last 7 Days" },
   { key: "30d", label: "Last 30 Days" },
 ];
@@ -155,7 +153,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [dateRange, setDateRange] = useState<DateRange>("today");
+  const [dateRange, setDateRange] = useState<DateRange>("7d");
   const [expenseModal, setExpenseModal] = useState(false);
   const [expForm, setExpForm] = useState({
     description: "",
@@ -229,7 +227,7 @@ export default function DashboardPage() {
               <h1 className="text-xl font-bold text-slate-900">Executive Performance Overview</h1>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Real-time revenue metrics, profit margins, inventory depletion alerts, and recent POS orders.
+              Real-time revenue, profit margins, inventory alerts & recent POS orders.
             </p>
           </div>
 
@@ -273,14 +271,7 @@ export default function DashboardPage() {
               Log Expense
             </Button>
 
-            <Button
-              size="sm"
-              onClick={() => router.push("/sales")}
-              className="gap-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-sm shadow-emerald-600/20"
-            >
-              <ShoppingCart size={15} />
-              Open POS
-            </Button>
+
           </div>
         </div>
 

@@ -5,41 +5,46 @@ import { useEffect, useRef, useCallback } from "react";
 interface UseBarcodeSccannerOptions {
   onScan: (barcode: string) => void;
   minLength?: number;
-  timeout?: number;
+  /** Max ms between keystrokes to be considered scanner input (default 50ms) */
+  threshold?: number;
   enabled?: boolean;
 }
 
 /**
- * Listens for rapid keyboard input that resembles a barcode scanner.
- * Scanners type chars very fast (< 50ms apart), followed by Enter.
+ * Listens for rapid keyboard input that resembles a USB/Bluetooth barcode scanner.
+ * Scanner guns type all chars < 50ms apart, then send Enter.
+ * Manual typing is much slower (> 100ms per key) so we ignore it here.
+ *
+ * Only fires when the focused element is NOT an input/textarea/select —
+ * that way manual fields are not intercepted.
  */
 export function useBarcodeScanner({
   onScan,
   minLength = 3,
-  timeout = 80,
+  threshold = 50,
   enabled = true,
 }: UseBarcodeSccannerOptions) {
-  const bufferRef = useRef<string>("");
+  const bufferRef      = useRef<string>("");
   const lastKeyTimeRef = useRef<number>(0);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timerRef       = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flush = useCallback(() => {
     const code = bufferRef.current.trim();
+    bufferRef.current = "";
     if (code.length >= minLength) {
       onScan(code);
     }
-    bufferRef.current = "";
   }, [onScan, minLength]);
 
   useEffect(() => {
     if (!enabled) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if user is typing in an input / textarea / select
+      // Let the user type normally in form fields
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
-      const now = Date.now();
+      const now   = Date.now();
       const delta = now - lastKeyTimeRef.current;
       lastKeyTimeRef.current = now;
 
@@ -49,21 +54,21 @@ export function useBarcodeScanner({
         return;
       }
 
-      // If gap too large, reset buffer
-      if (delta > 300 && bufferRef.current.length > 0) {
+      // If gap too large, this is manual typing — reset buffer
+      if (bufferRef.current.length > 0 && delta > 300) {
         bufferRef.current = "";
       }
 
+      // Only printable single chars
       if (e.key.length === 1) {
         bufferRef.current += e.key;
       }
 
-      // Auto-flush after timeout (in case no Enter key comes)
+      // Scanner sometimes skips Enter (older models) — auto-flush after quiet period
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
-        if (bufferRef.current.length >= minLength) flush();
-        else bufferRef.current = "";
-      }, timeout * 3);
+        flush();
+      }, threshold * 6); // 300ms quiet = scanner done
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -71,5 +76,5 @@ export function useBarcodeScanner({
       window.removeEventListener("keydown", handleKeyDown);
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [enabled, flush, timeout, minLength]);
+  }, [enabled, flush, threshold]);
 }
