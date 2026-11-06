@@ -51,6 +51,7 @@ import Input from "@/components/ui/Input";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { toastApiError, toastSuccess } from "@/lib/toast";
 import { apiGet, apiPost } from "@/lib/apiClient";
+import { authService } from "@/services/authService";
 
 type DateRange = "7d" | "30d";
 
@@ -162,6 +163,14 @@ export default function DashboardPage() {
     date: "",
   });
   const [savingExpense, setSavingExpense] = useState(false);
+
+  // Cashier ko seedha POS pe bhejo — dashboard admin ke liye hai
+  useEffect(() => {
+    const role = authService.getRole();
+    if (role === "cashier") {
+      router.replace("/sales");
+    }
+  }, [router]);
 
   useEffect(() => {
     setExpForm((f) => ({ ...f, date: new Date().toISOString().split("T")[0] }));
