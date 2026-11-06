@@ -1,4 +1,4 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 export interface AuthUser {
   id:    string;
@@ -17,7 +17,7 @@ export const authService = {
         body:    JSON.stringify({ email: email.trim(), password: password.trim() }),
       });
     } catch {
-      throw new Error("Cannot connect to server. Please ensure the backend is running on port 5000.");
+      throw new Error("Cannot connect to server. Please try again.");
     }
     const json = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(json.message ?? "Invalid email or password");

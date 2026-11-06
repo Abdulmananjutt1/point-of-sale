@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
@@ -13,6 +12,8 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // Prevent Prisma/bcryptjs from being bundled on client side
+  serverExternalPackages: ["@prisma/client", "bcryptjs"],
 };
 
 export default nextConfig;

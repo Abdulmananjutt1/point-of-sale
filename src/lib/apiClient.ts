@@ -4,7 +4,9 @@
  * - Validation errors (422) ko single message mein combine karta hai
  */
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
+// In development: /api (relative — Next.js serves its own API routes)
+// In production: set NEXT_PUBLIC_API_URL to your domain if needed
+const BASE = process.env.NEXT_PUBLIC_API_URL ?? "/api";
 
 function getHeaders(): HeadersInit {
   const token =
